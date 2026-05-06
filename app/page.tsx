@@ -4,22 +4,8 @@ import { useMemo, useState } from "react";
 
 const категорииМест = [
   { id: 1, name: "Премиум центр", base: 3000 },
-  { id: 6, name: "Стандарт", base: 1000 },
-  { id: 14, name: "Эконом", base: 450 },
-];
-
-const сектора = [
-  { name: "A1", top: "8%", left: "38%", demand: 91, base: 4500 },
-  { name: "A2", top: "8%", left: "50%", demand: 86, base: 4500 },
-  { name: "B1", top: "24%", left: "72%", demand: 74, base: 3000 },
-  { name: "B2", top: "42%", left: "80%", demand: 68, base: 2500 },
-  { name: "B3", top: "60%", left: "72%", demand: 61, base: 2200 },
-  { name: "C1", top: "78%", left: "50%", demand: 83, base: 4000 },
-  { name: "C2", top: "78%", left: "38%", demand: 79, base: 3500 },
-  { name: "D1", top: "60%", left: "18%", demand: 47, base: 1500 },
-  { name: "D2", top: "42%", left: "10%", demand: 34, base: 1000 },
-  { name: "D3", top: "24%", left: "18%", demand: 29, base: 900 },
-  { name: "VIP", top: "42%", left: "45%", demand: 94, base: 12000 },
+  { id: 2, name: "Стандарт", base: 1200 },
+  { id: 3, name: "Эконом", base: 600 },
 ];
 
 export default function Home() {
@@ -34,7 +20,6 @@ export default function Home() {
   const [местоКоманды, setМестоКоманды] = useState(5);
   const [местоСоперника, setМестоСоперника] = useState(3);
   const [победнаяСерия, setПобеднаяСерия] = useState(1);
-  const [выбранныйСектор, setВыбранныйСектор] = useState(сектора[0]);
 
   const категорияМеста =
     категорииМест.find((s) => s.id === категорияМестаId) || категорииМест[0];
@@ -79,19 +64,21 @@ export default function Home() {
 
     const итоговаяЦена = Math.round(цена);
     const количествоБилетов = 500;
-    const выручкаФикс = категорияМеста.base * количествоБилетов;
-    const выручкаДинамическая = итоговаяЦена * количествоБилетов;
-    const дополнительнаяВыручка = выручкаДинамическая - выручкаФикс;
+    const базоваяВыручка = категорияМеста.base * количествоБилетов;
+    const динамическаяВыручка = итоговаяЦена * количествоБилетов;
+    const дополнительнаяВыручка = динамическаяВыручка - базоваяВыручка;
 
     const график = Array.from({ length: 8 }, (_, i) => {
-      const спрос = Math.min(100, 10 + i * 12 + продано / 5);
-      const ценаГрафика = Math.round(
-        категорияМеста.base *
-          (1 + спрос / 100) *
-          (категорияМатча === 1 ? 1.6 : категорияМатча === 2 ? 1.25 : 1)
-      );
+      const спрос = Math.min(100, 15 + i * 10 + продано / 5);
 
-      return { спрос, price: ценаГрафика };
+      return {
+        спрос,
+        price: Math.round(
+          категорияМеста.base *
+            (1 + спрос / 100) *
+            (категорияМатча === 1 ? 1.6 : категорияМатча === 2 ? 1.25 : 1)
+        ),
+      };
     });
 
     let рекомендация = "Сохранять текущую цену";
@@ -112,17 +99,22 @@ export default function Home() {
       действие = "Постепенно увеличить цену";
     }
 
+    const вероятностьSoldOut = Math.min(97, Math.round(продано + (60 - днейДоМатча) * 0.8));
+    const confidence = Math.min(96, Math.round(72 + продано * 0.18));
+
     return {
       итоговаяЦена,
       ростПроцентов: Math.round((итоговаяЦена / категорияМеста.base - 1) * 100),
-      выручкаФикс,
-      выручкаДинамическая,
+      базоваяВыручка,
+      динамическаяВыручка,
       дополнительнаяВыручка,
       коэффициенты,
       график,
       рекомендация,
       причина,
       действие,
+      вероятностьSoldOut,
+      confidence,
     };
   }, [
     категорияМеста,
@@ -138,42 +130,34 @@ export default function Home() {
     победнаяСерия,
   ]);
 
-  const выбраннаяЦена = Math.round(
-    выбранныйСектор.base * (1 + выбранныйСектор.demand / 100)
-  );
-
-  const выбранныйЦвет = getDemandColor(выбранныйСектор.demand);
-
-  const максимальнаяЦенаГрафика = Math.max(
-    ...результат.график.map((p) => p.price)
-  );
+  const maxPrice = Math.max(...результат.график.map((g) => g.price));
 
   return (
     <main style={styles.page}>
       <section style={styles.hero}>
         <div>
-          <div style={styles.badge}>Алгоритм динамического ценообразования</div>
-          <h1 style={styles.title}>Платформа управления ценами</h1>
+          <div style={styles.badge}>AI Dynamic Ticket Pricing</div>
+
+          <h1 style={styles.title}>Платформа управления билетными ценами</h1>
+
           <p style={styles.subtitle}>
-            Система автоматически рассчитывает стоимость билета на основе спроса,
-            времени до матча, категории события, соперника и спортивных факторов.
+            Алгоритм автоматически изменяет стоимость билетов в зависимости от спроса,
+            времени до матча, категории события и спортивных факторов.
           </p>
         </div>
 
         <div style={styles.priceCard}>
           <span style={styles.cardLabel}>Рекомендованная цена</span>
-          <h2 style={styles.price}>
-            {результат.итоговаяЦена.toLocaleString()} ₽
-          </h2>
-          <p style={styles.green}>
-            +{результат.ростПроцентов}% к базовой цене
-          </p>
+
+          <h2 style={styles.price}>{результат.итоговаяЦена.toLocaleString()} ₽</h2>
+
+          <p style={styles.green}>+{результат.ростПроцентов}% к базовой цене</p>
         </div>
       </section>
 
       <section style={styles.kpiGrid}>
-        <Kpi title="Базовая выручка" value={`${результат.выручкаФикс.toLocaleString()} ₽`} />
-        <Kpi title="Динамическая выручка" value={`${результат.выручкаДинамическая.toLocaleString()} ₽`} />
+        <Kpi title="Базовая выручка" value={`${результат.базоваяВыручка.toLocaleString()} ₽`} />
+        <Kpi title="Динамическая выручка" value={`${результат.динамическаяВыручка.toLocaleString()} ₽`} />
         <Kpi title="Дополнительная выручка" value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`} highlight />
         <Kpi title="Продано билетов" value={`${продано}%`} />
       </section>
@@ -183,6 +167,7 @@ export default function Home() {
           <h3>Настройки матча</h3>
 
           <Label text="Категория места" />
+
           <select
             style={styles.select}
             value={категорияМестаId}
@@ -196,17 +181,18 @@ export default function Home() {
           </select>
 
           <Label text="Категория матча" />
+
           <select
             style={styles.select}
             value={категорияМатча}
             onChange={(e) => setКатегорияМатча(Number(e.target.value))}
           >
-            <option value={1}>1 категория — высокий спрос</option>
-            <option value={2}>2 категория — средний спрос</option>
-            <option value={3}>3 категория — низкий спрос</option>
+            <option value={1}>Высокий спрос</option>
+            <option value={2}>Средний спрос</option>
+            <option value={3}>Низкий спрос</option>
           </select>
 
-          <Slider label="Продано билетов" value={продано} max={100} setValue={setПродано} suffix="%" />
+          <Slider label="Продано билетов" value={продано} max={100} suffix="%" setValue={setПродано} />
           <Slider label="Дней до матча" value={днейДоМатча} max={60} setValue={setДнейДоМатча} />
           <Slider label="Место команды" value={местоКоманды} min={1} max={12} setValue={setМестоКоманды} />
           <Slider label="Место соперника" value={местоСоперника} min={1} max={12} setValue={setМестоСоперника} />
@@ -214,7 +200,7 @@ export default function Home() {
         </div>
 
         <div style={styles.panel}>
-          <h3>Прогноз цены</h3>
+          <h3>Прогноз роста цены</h3>
 
           <div style={styles.chart}>
             {результат.график.map((point, i) => (
@@ -222,170 +208,92 @@ export default function Home() {
                 <div
                   style={{
                     ...styles.bar,
-                    height: `${(point.price / максимальнаяЦенаГрафика) * 190}px`,
+                    height: `${(point.price / maxPrice) * 190}px`,
                   }}
                 />
-                <span style={styles.barLabel}>
-                  {point.price.toLocaleString()} ₽
-                </span>
+
+                <span style={styles.barLabel}>{point.price.toLocaleString()} ₽</span>
               </div>
             ))}
           </div>
 
-          <p style={styles.hint}>
-            График показывает рост рекомендованной цены при увеличении спроса.
-          </p>
+          <p style={styles.hint}>График показывает рост цены при увеличении спроса.</p>
         </div>
       </section>
 
       <section style={styles.grid}>
         <div style={styles.panel}>
-          <h3>Интерактивная карта спроса арены</h3>
+          <h3>AI Pricing Engine</h3>
 
-          <div style={styles.heatmapShell}>
-            <div style={styles.commercialHeatmap}>
-              <div style={styles.rink}>
-                <span>ЛЁД</span>
-                <small>основная площадка</small>
-              </div>
-
-              {сектора.map((sector) => {
-                const color = getDemandColor(sector.demand);
-                const price = Math.round(sector.base * (1 + sector.demand / 100));
-                const active = выбранныйСектор.name === sector.name;
-
-                return (
-                  <button
-                    key={sector.name}
-                    style={{
-                      ...styles.commercialSector,
-                      top: sector.top,
-                      left: sector.left,
-                      background: color,
-                      boxShadow: active
-                        ? `0 0 0 3px #fff, 0 0 32px ${color}`
-                        : `0 0 26px ${color}80`,
-                      transform: active
-                        ? "translate(-50%, -50%) scale(1.08)"
-                        : "translate(-50%, -50%)",
-                    }}
-                    onClick={() => setВыбранныйСектор(sector)}
-                  >
-                    <b>{sector.name}</b>
-                    <span>{sector.demand}%</span>
-                    <small>{price.toLocaleString()} ₽</small>
-                  </button>
-                );
-              })}
+          <div style={styles.aiEngine}>
+            <div style={styles.aiRow}>
+              <span>Текущий спрос</span>
+              <b style={{ color: продано > 60 ? "#ef4444" : продано > 35 ? "#f59e0b" : "#22c55e" }}>
+                {продано > 60 ? "Высокий" : продано > 35 ? "Средний" : "Низкий"}
+              </b>
             </div>
 
-            <div style={styles.selectedSectorCard}>
-              <span style={styles.cardLabel}>Выбранный сектор</span>
-              <h2 style={styles.aiTitle}>{выбранныйСектор.name}</h2>
-
-              <div style={styles.metricLine}>
-                <span>Спрос</span>
-                <b style={{ color: выбранныйЦвет }}>{выбранныйСектор.demand}%</b>
-              </div>
-
-              <div style={styles.metricLine}>
-                <span>Базовая цена</span>
-                <b>{выбранныйСектор.base.toLocaleString()} ₽</b>
-              </div>
-
-              <div style={styles.metricLine}>
-                <span>Динамическая цена</span>
-                <b>{выбраннаяЦена.toLocaleString()} ₽</b>
-              </div>
-
-              <div style={styles.metricLine}>
-                <span>Рекомендация</span>
-                <b>
-                  {выбранныйСектор.demand > 80
-                    ? "Повысить"
-                    : выбранныйСектор.demand < 40
-                    ? "Стимулировать"
-                    : "Сохранять"}
-                </b>
-              </div>
+            <div style={styles.aiRow}>
+              <span>Вероятность sold out</span>
+              <b>{результат.вероятностьSoldOut}%</b>
             </div>
-          </div>
 
-          <div style={styles.legend}>
-            <span><b style={{ color: "#ef4444" }}>●</b> высокий спрос</span>
-            <span><b style={{ color: "#f59e0b" }}>●</b> средний спрос</span>
-            <span><b style={{ color: "#22c55e" }}>●</b> стабильный спрос</span>
-            <span><b style={{ color: "#3b82f6" }}>●</b> низкий спрос</span>
+            <div style={styles.aiRow}>
+              <span>Confidence score</span>
+              <b>{результат.confidence}%</b>
+            </div>
+
+            <div style={styles.aiRow}>
+              <span>Прогноз роста цены</span>
+              <b>+{Math.max(0, Math.round(результат.ростПроцентов * 0.35))}%</b>
+            </div>
+
+            <div style={styles.aiRow}>
+              <span>Revenue uplift</span>
+              <b>{результат.дополнительнаяВыручка.toLocaleString()} ₽</b>
+            </div>
+
+            <div style={styles.aiRecommendation}>
+              <span style={styles.cardLabel}>Рекомендация AI</span>
+
+              <h2>{результат.рекомендация}</h2>
+
+              <p>
+                <b>Причина:</b> {результат.причина}
+              </p>
+
+              <p>
+                <b>Действие:</b> {результат.действие}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div style={styles.panel}>
-          <h3>AI-рекомендация</h3>
-
-          <div style={styles.aiBox}>
-            <span style={styles.cardLabel}>Рекомендация системы</span>
-            <h2 style={styles.aiTitle}>{результат.рекомендация}</h2>
-
-            <p>
-              <b>Причина:</b> {результат.причина}
-            </p>
-
-            <p>
-              <b>Действие:</b> {результат.действие}
-            </p>
-
-            <p style={styles.green}>
-              Потенциальный эффект:{" "}
-              {Math.max(
-                0,
-                Math.round(результат.дополнительнаяВыручка * 0.18)
-              ).toLocaleString()} ₽
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section style={styles.grid}>
         <div style={styles.panel}>
           <h3>Факторы спроса</h3>
 
           <Check text="Выходной день" checked={выходнойДень} setChecked={setВыходнойДень} />
-          <Check text="Удобное время матча" checked={удобноеВремя} setChecked={setУдобноеВремя} />
-          <Check text="Есть звезда у соперника" checked={естьЗвезда} setChecked={setЕстьЗвезда} />
+          <Check text="Удобное время" checked={удобноеВремя} setChecked={setУдобноеВремя} />
+          <Check text="Есть звезда" checked={естьЗвезда} setChecked={setЕстьЗвезда} />
           <Check text="Дерби" checked={дерби} setChecked={setДерби} />
-        </div>
 
-        <div style={styles.panel}>
-          <h3>Применённые коэффициенты</h3>
+          <div style={{ marginTop: 28 }}>
+            <h3>Применённые коэффициенты</h3>
 
-          {результат.коэффициенты.map((f, i) => (
-            <div key={i} style={styles.factor}>
-              <span>{f.name}</span>
-              <b>x{f.coef}</b>
-            </div>
-          ))}
+            {результат.коэффициенты.map((f, i) => (
+              <div key={i} style={styles.factor}>
+                <span>{f.name}</span>
+                <b>x{f.coef}</b>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
   );
 }
 
-function getDemandColor(demand: number) {
-  if (demand > 80) return "#ef4444";
-  if (demand > 60) return "#f59e0b";
-  if (demand > 40) return "#22c55e";
-  return "#3b82f6";
-}
-
-function Kpi({
-  title,
-  value,
-  highlight = false,
-}: {
-  title: string;
-  value: string;
-  highlight?: boolean;
-}) {
+function Kpi({ title, value, highlight = false }: any) {
   return (
     <div
       style={{
@@ -399,18 +307,11 @@ function Kpi({
   );
 }
 
-function Label({ text }: { text: string }) {
+function Label({ text }: any) {
   return <p style={styles.label}>{text}</p>;
 }
 
-function Slider({
-  label,
-  value,
-  setValue,
-  min = 0,
-  max,
-  suffix = "",
-}: any) {
+function Slider({ label, value, setValue, min = 0, max, suffix = "" }: any) {
   return (
     <div style={{ marginTop: 18 }}>
       <div style={styles.sliderTop}>
@@ -420,6 +321,7 @@ function Slider({
           {suffix}
         </b>
       </div>
+
       <input
         style={styles.range}
         type="range"
@@ -435,12 +337,7 @@ function Slider({
 function Check({ text, checked, setChecked }: any) {
   return (
     <label style={styles.check}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={() => setChecked(!checked)}
-      />{" "}
-      {text}
+      <input type="checkbox" checked={checked} onChange={() => setChecked(!checked)} /> {text}
     </label>
   );
 }
@@ -448,18 +345,19 @@ function Check({ text, checked, setChecked }: any) {
 const styles: any = {
   page: {
     minHeight: "100vh",
-    background:
-      "radial-gradient(circle at top left, #1f2a44, #080b12 45%, #05060a)",
+    background: "radial-gradient(circle at top left, #1f2a44, #080b12 45%, #05060a)",
     color: "#fff",
     padding: 36,
     fontFamily: "Inter, Arial, sans-serif",
   },
+
   hero: {
     display: "grid",
     gridTemplateColumns: "1.5fr 1fr",
     gap: 24,
     marginBottom: 24,
   },
+
   badge: {
     display: "inline-block",
     padding: "8px 12px",
@@ -469,18 +367,21 @@ const styles: any = {
     fontSize: 13,
     marginBottom: 16,
   },
+
   title: {
-    fontSize: 56,
+    fontSize: 54,
     lineHeight: 1,
     margin: 0,
     letterSpacing: "-2px",
   },
+
   subtitle: {
-    maxWidth: 680,
+    maxWidth: 700,
     color: "#aeb7c7",
     fontSize: 18,
     lineHeight: 1.5,
   },
+
   priceCard: {
     background: "rgba(255,255,255,0.08)",
     border: "1px solid rgba(255,255,255,0.12)",
@@ -488,41 +389,49 @@ const styles: any = {
     padding: 28,
     backdropFilter: "blur(20px)",
   },
+
   cardLabel: {
     color: "#8e9bb0",
     fontSize: 14,
   },
+
   price: {
     fontSize: 52,
     margin: "14px 0 6px",
   },
+
   green: {
     color: "#27e6a1",
     margin: 0,
   },
+
   kpiGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     gap: 16,
     marginBottom: 24,
   },
+
   kpi: {
     background: "rgba(255,255,255,0.06)",
     border: "1px solid rgba(255,255,255,0.08)",
     borderRadius: 22,
     padding: 22,
   },
+
   kpiValue: {
     display: "block",
     fontSize: 24,
     marginTop: 10,
   },
+
   grid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: 24,
     marginBottom: 24,
   },
+
   panel: {
     background: "rgba(255,255,255,0.07)",
     border: "1px solid rgba(255,255,255,0.1)",
@@ -530,10 +439,12 @@ const styles: any = {
     padding: 24,
     backdropFilter: "blur(18px)",
   },
+
   label: {
     color: "#aeb7c7",
     marginBottom: 8,
   },
+
   select: {
     width: "100%",
     padding: 14,
@@ -543,14 +454,17 @@ const styles: any = {
     color: "#fff",
     marginBottom: 16,
   },
+
   sliderTop: {
     display: "flex",
     justifyContent: "space-between",
     color: "#dce3ef",
   },
+
   range: {
     width: "100%",
   },
+
   chart: {
     height: 260,
     display: "flex",
@@ -558,6 +472,7 @@ const styles: any = {
     gap: 18,
     paddingTop: 30,
   },
+
   barWrap: {
     flex: 1,
     display: "flex",
@@ -565,110 +480,55 @@ const styles: any = {
     alignItems: "center",
     justifyContent: "end",
   },
+
   bar: {
     width: "100%",
     borderRadius: "14px 14px 4px 4px",
     background: "linear-gradient(180deg, #27e6a1, #3b82f6)",
     boxShadow: "0 0 30px rgba(39,230,161,0.25)",
   },
+
   barLabel: {
     marginTop: 8,
     color: "#8e9bb0",
     fontSize: 12,
   },
+
   hint: {
     color: "#8e9bb0",
   },
-  heatmapShell: {
-    display: "grid",
-    gridTemplateColumns: "1.5fr 0.8fr",
-    gap: 18,
-    alignItems: "stretch",
-  },
-  commercialHeatmap: {
-    position: "relative",
-    height: 420,
+
+  aiEngine: {
     marginTop: 20,
-    borderRadius: 32,
-    background:
-      "radial-gradient(circle at center, rgba(255,255,255,0.12), rgba(255,255,255,0.03))",
-    border: "1px solid rgba(255,255,255,0.12)",
-    overflow: "hidden",
-  },
-  rink: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 260,
-    height: 135,
-    borderRadius: 80,
-    border: "2px solid rgba(255,255,255,0.4)",
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04))",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    fontWeight: 900,
-    letterSpacing: "2px",
-  },
-  commercialSector: {
-    position: "absolute",
-    width: 86,
-    height: 66,
-    borderRadius: 18,
-    padding: 10,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    color: "#fff",
-    fontWeight: 800,
-    fontSize: 12,
-    border: "none",
-    cursor: "pointer",
-    transition: "0.2s ease",
-  },
-  selectedSectorCard: {
-    marginTop: 20,
-    borderRadius: 26,
-    padding: 22,
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.12)",
-  },
-  metricLine: {
-    display: "flex",
-    justifyContent: "space-between",
     gap: 16,
-    padding: "12px 0",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
+  },
+
+  aiRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "18px 20px",
+    borderRadius: 18,
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.08)",
     color: "#dce3ef",
   },
-  legend: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 14,
-    marginTop: 16,
-    color: "#aeb7c7",
-    fontSize: 13,
-  },
-  aiBox: {
-    marginTop: 18,
+
+  aiRecommendation: {
+    marginTop: 10,
     padding: 24,
     borderRadius: 24,
-    background:
-      "linear-gradient(135deg, rgba(39,230,161,0.12), rgba(59,130,246,0.12))",
+    background: "linear-gradient(135deg, rgba(39,230,161,0.14), rgba(59,130,246,0.14))",
     border: "1px solid rgba(39,230,161,0.25)",
   },
-  aiTitle: {
-    fontSize: 34,
-    margin: "12px 0",
-  },
+
   check: {
     display: "block",
     marginBottom: 14,
     color: "#dce3ef",
   },
+
   factor: {
     display: "flex",
     justifyContent: "space-between",
