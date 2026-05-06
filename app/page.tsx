@@ -2,173 +2,218 @@
 
 import { useMemo, useState } from "react";
 
-const seatCategories = [
-  { id: 1, name: "Premium Center", base: 3000 },
-  { id: 6, name: "Standard", base: 1000 },
-  { id: 14, name: "Economy", base: 450 },
+const категорииМест = [
+  { id: 1, name: "Премиум центр", base: 3000 },
+  { id: 6, name: "Стандарт", base: 1000 },
+  { id: 14, name: "Эконом", base: 450 },
 ];
 
 export default function Home() {
-  const [seatId, setSeatId] = useState(1);
-  const [matchCategory, setMatchCategory] = useState(1);
-  const [sold, setSold] = useState(35);
-  const [days, setDays] = useState(10);
-  const [isWeekend, setIsWeekend] = useState(false);
-  const [goodTime, setGoodTime] = useState(true);
-  const [hasStar, setHasStar] = useState(true);
-  const [isDerby, setIsDerby] = useState(true);
-  const [teamPlace, setTeamPlace] = useState(5);
-  const [opponentPlace, setOpponentPlace] = useState(3);
-  const [winStreak, setWinStreak] = useState(1);
+  const [категорияМестаId, setКатегорияМестаId] = useState(1);
+  const [категорияМатча, setКатегорияМатча] = useState(1);
+  const [продано, setПродано] = useState(35);
+  const [днейДоМатча, setДнейДоМатча] = useState(10);
+  const [выходнойДень, setВыходнойДень] = useState(false);
+  const [удобноеВремя, setУдобноеВремя] = useState(true);
+  const [естьЗвезда, setЕстьЗвезда] = useState(true);
+  const [дерби, setДерби] = useState(true);
+  const [местоКоманды, setМестоКоманды] = useState(5);
+  const [местоСоперника, setМестоСоперника] = useState(3);
+  const [победнаяСерия, setПобеднаяСерия] = useState(1);
 
-  const seat = seatCategories.find((s) => s.id === seatId) || seatCategories[0];
+  const категорияМеста =
+    категорииМест.find((s) => s.id === категорияМестаId) || категорииМест[0];
 
-  const result = useMemo(() => {
-    let price = seat.base;
-    const factors: { name: string; coef: number }[] = [];
+  const результат = useMemo(() => {
+    let цена = категорияМеста.base;
+    const коэффициенты: { name: string; coef: number }[] = [];
 
-    const add = (name: string, coef: number) => {
-      price *= coef;
-      factors.push({ name, coef });
+    const добавитьКоэффициент = (name: string, coef: number) => {
+      цена *= coef;
+      коэффициенты.push({ name, coef });
     };
 
-    if (matchCategory === 1) add("Match category", 2);
-    if (matchCategory === 2) add("Match category", 1.5);
-    if (matchCategory === 3) add("Match category", 1);
+    if (категорияМатча === 1) добавитьКоэффициент("Категория матча", 2);
+    if (категорияМатча === 2) добавитьКоэффициент("Категория матча", 1.5);
+    if (категорияМатча === 3) добавитьКоэффициент("Категория матча", 1);
 
-    add("Day of week", isWeekend ? 1.1 : 0.9);
-    add("Match time", goodTime ? 1.05 : 0.95);
+    добавитьКоэффициент("День недели", выходнойДень ? 1.1 : 0.9);
+    добавитьКоэффициент("Время матча", удобноеВремя ? 1.05 : 0.95);
 
-    if (hasStar) add("Opponent star player", 1.1);
-    if (isDerby) add("Derby factor", 1.15);
+    if (естьЗвезда) добавитьКоэффициент("Звезда у соперника", 1.1);
+    if (дерби) добавитьКоэффициент("Дерби", 1.15);
 
-    if (teamPlace <= 3) add("Team position", 1.15);
-    else if (teamPlace <= 8) add("Team position", 1.05);
-    else add("Team position", 0.95);
+    if (местоКоманды <= 3) добавитьКоэффициент("Положение команды", 1.15);
+    else if (местоКоманды <= 8) добавитьКоэффициент("Положение команды", 1.05);
+    else добавитьКоэффициент("Положение команды", 0.95);
 
-    if (opponentPlace <= 3) add("Opponent position", 1.15);
-    else if (opponentPlace <= 8) add("Opponent position", 1.05);
-    else add("Opponent position", 0.95);
+    if (местоСоперника <= 3) добавитьКоэффициент("Положение соперника", 1.15);
+    else if (местоСоперника <= 8)
+      добавитьКоэффициент("Положение соперника", 1.05);
+    else добавитьКоэффициент("Положение соперника", 0.95);
 
-    if (winStreak >= 3) add("Winning streak", 1.1);
-    else if (winStreak === 0) add("No winning streak", 0.95);
+    if (победнаяСерия >= 3) добавитьКоэффициент("Победная серия", 1.1);
+    else if (победнаяСерия === 0)
+      добавитьКоэффициент("Нет победной серии", 0.95);
 
-    if (sold > 30) add("Demand > 30%", 1.1);
-    if (sold > 50) add("Demand > 50%", 1.15);
-    if (sold > 70) add("Demand > 70%", 1.25);
-    if (sold > 85) add("Ticket scarcity", 1.2);
+    if (продано > 30) добавитьКоэффициент("Продано более 30%", 1.1);
+    if (продано > 50) добавитьКоэффициент("Продано более 50%", 1.15);
+    if (продано > 70) добавитьКоэффициент("Продано более 70%", 1.25);
+    if (продано > 85) добавитьКоэффициент("Дефицит билетов", 1.2);
 
-    if (days < 7) add("Less than 7 days", 1.1);
-    if (days < 2) add("Less than 2 days", 1.2);
+    if (днейДоМатча < 7)
+      добавитьКоэффициент("Менее 7 дней до матча", 1.1);
+    if (днейДоМатча < 2)
+      добавитьКоэффициент("Менее 2 дней до матча", 1.2);
 
-    const finalPrice = Math.round(price);
-    const tickets = 500;
-    const baseRevenue = seat.base * tickets;
-    const dynamicRevenue = finalPrice * tickets;
-    const revenueGrowth = dynamicRevenue - baseRevenue;
+    const итоговаяЦена = Math.round(цена);
+    const количествоБилетов = 500;
+    const выручкаФикс = категорияМеста.base * количествоБилетов;
+    const выручкаДинамическая = итоговаяЦена * количествоБилетов;
+    const дополнительнаяВыручка = выручкаДинамическая - выручкаФикс;
 
-    const chart = Array.from({ length: 8 }, (_, i) => {
-      const demand = Math.min(100, 10 + i * 12 + sold / 5);
-      const chartPrice = Math.round(seat.base * (1 + demand / 100) * (matchCategory === 1 ? 1.6 : matchCategory === 2 ? 1.25 : 1));
-      return { demand, price: chartPrice };
+    const график = Array.from({ length: 8 }, (_, i) => {
+      const спрос = Math.min(100, 10 + i * 12 + продано / 5);
+      const ценаГрафика = Math.round(
+        категорияМеста.base *
+          (1 + спрос / 100) *
+          (категорияМатча === 1 ? 1.6 : категорияМатча === 2 ? 1.25 : 1)
+      );
+
+      return { спрос, price: ценаГрафика };
     });
 
     return {
-      finalPrice,
-      growthPercent: Math.round(((finalPrice / seat.base) - 1) * 100),
-      baseRevenue,
-      dynamicRevenue,
-      revenueGrowth,
-      factors,
-      chart,
+      итоговаяЦена,
+      ростПроцентов: Math.round((итоговаяЦена / категорияМеста.base - 1) * 100),
+      выручкаФикс,
+      выручкаДинамическая,
+      дополнительнаяВыручка,
+      коэффициенты,
+      график,
     };
-  }, [seat, matchCategory, sold, days, isWeekend, goodTime, hasStar, isDerby, teamPlace, opponentPlace, winStreak]);
+  }, [
+    категорияМеста,
+    категорияМатча,
+    продано,
+    днейДоМатча,
+    выходнойДень,
+    удобноеВремя,
+    естьЗвезда,
+    дерби,
+    местоКоманды,
+    местоСоперника,
+    победнаяСерия,
+  ]);
 
-  const maxChartPrice = Math.max(...result.chart.map((p) => p.price));
+  const максимальнаяЦенаГрафика = Math.max(
+    ...результат.график.map((p) => p.price)
+  );
 
   return (
     <main style={styles.page}>
       <section style={styles.hero}>
         <div>
-          <div style={styles.badge}>AI Ticket Revenue Engine</div>
-          <h1 style={styles.title}>Dynamic Pricing Platform</h1>
+          <div style={styles.badge}>Алгоритм динамического ценообразования</div>
+          <h1 style={styles.title}>Платформа управления ценами</h1>
           <p style={styles.subtitle}>
-            Автоматическое изменение цены билетов на основе спроса, времени до матча,
-            категории события и спортивных факторов.
+            Система автоматически рассчитывает стоимость билета на основе спроса,
+            времени до матча, категории события, соперника и спортивных факторов.
           </p>
         </div>
 
         <div style={styles.priceCard}>
-          <span style={styles.cardLabel}>Current recommended price</span>
-          <h2 style={styles.price}>{result.finalPrice.toLocaleString()} ₽</h2>
-          <p style={styles.green}>+{result.growthPercent}% к базовой цене</p>
+          <span style={styles.cardLabel}>Рекомендованная цена</span>
+          <h2 style={styles.price}>
+            {результат.итоговаяЦена.toLocaleString()} ₽
+          </h2>
+          <p style={styles.green}>
+            +{результат.ростПроцентов}% к базовой цене
+          </p>
         </div>
       </section>
 
       <section style={styles.kpiGrid}>
-        <Kpi title="Base revenue" value={`${result.baseRevenue.toLocaleString()} ₽`} />
-        <Kpi title="Dynamic revenue" value={`${result.dynamicRevenue.toLocaleString()} ₽`} />
-        <Kpi title="Additional revenue" value={`${result.revenueGrowth.toLocaleString()} ₽`} highlight />
-        <Kpi title="Tickets sold" value={`${sold}%`} />
+        <Kpi title="Базовая выручка" value={`${результат.выручкаФикс.toLocaleString()} ₽`} />
+        <Kpi title="Динамическая выручка" value={`${результат.выручкаДинамическая.toLocaleString()} ₽`} />
+        <Kpi title="Дополнительная выручка" value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`} highlight />
+        <Kpi title="Продано билетов" value={`${продано}%`} />
       </section>
 
       <section style={styles.grid}>
         <div style={styles.panel}>
-          <h3>Match settings</h3>
+          <h3>Настройки матча</h3>
 
-          <Label text="Seat category" />
-          <select style={styles.select} value={seatId} onChange={(e) => setSeatId(Number(e.target.value))}>
-            {seatCategories.map((s) => (
-              <option key={s.id} value={s.id}>{s.name} — {s.base} ₽</option>
+          <Label text="Категория места" />
+          <select
+            style={styles.select}
+            value={категорияМестаId}
+            onChange={(e) => setКатегорияМестаId(Number(e.target.value))}
+          >
+            {категорииМест.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} — {s.base} ₽
+              </option>
             ))}
           </select>
 
-          <Label text="Match category" />
-          <select style={styles.select} value={matchCategory} onChange={(e) => setMatchCategory(Number(e.target.value))}>
-            <option value={1}>Category 1 — top demand</option>
-            <option value={2}>Category 2 — medium demand</option>
-            <option value={3}>Category 3 — low demand</option>
+          <Label text="Категория матча" />
+          <select
+            style={styles.select}
+            value={категорияМатча}
+            onChange={(e) => setКатегорияМатча(Number(e.target.value))}
+          >
+            <option value={1}>1 категория — высокий спрос</option>
+            <option value={2}>2 категория — средний спрос</option>
+            <option value={3}>3 категория — низкий спрос</option>
           </select>
 
-          <Slider label="Tickets sold" value={sold} max={100} setValue={setSold} suffix="%" />
-          <Slider label="Days to match" value={days} max={60} setValue={setDays} />
-          <Slider label="Team position" value={teamPlace} min={1} max={12} setValue={setTeamPlace} />
-          <Slider label="Opponent position" value={opponentPlace} min={1} max={12} setValue={setOpponentPlace} />
-          <Slider label="Winning streak" value={winStreak} max={5} setValue={setWinStreak} />
+          <Slider label="Продано билетов" value={продано} max={100} setValue={setПродано} suffix="%" />
+          <Slider label="Дней до матча" value={днейДоМатча} max={60} setValue={setДнейДоМатча} />
+          <Slider label="Место команды" value={местоКоманды} min={1} max={12} setValue={setМестоКоманды} />
+          <Slider label="Место соперника" value={местоСоперника} min={1} max={12} setValue={setМестоСоперника} />
+          <Slider label="Победная серия" value={победнаяСерия} max={5} setValue={setПобеднаяСерия} />
         </div>
 
         <div style={styles.panel}>
-          <h3>Revenue forecast</h3>
+          <h3>Прогноз цены</h3>
+
           <div style={styles.chart}>
-            {result.chart.map((point, i) => (
+            {результат.график.map((point, i) => (
               <div key={i} style={styles.barWrap}>
                 <div
                   style={{
                     ...styles.bar,
-                    height: `${(point.price / maxChartPrice) * 190}px`,
+                    height: `${(point.price / максимальнаяЦенаГрафика) * 190}px`,
                   }}
                 />
-                <span style={styles.barLabel}>{point.price}</span>
+                <span style={styles.barLabel}>
+                  {point.price.toLocaleString()} ₽
+                </span>
               </div>
             ))}
           </div>
-          <p style={styles.hint}>График показывает рост рекомендованной цены при увеличении спроса.</p>
+
+          <p style={styles.hint}>
+            График показывает рост рекомендованной цены при увеличении спроса.
+          </p>
         </div>
       </section>
 
       <section style={styles.grid}>
         <div style={styles.panel}>
-          <h3>Active factors</h3>
+          <h3>Факторы спроса</h3>
 
-          <Check text="Weekend match" checked={isWeekend} setChecked={setIsWeekend} />
-          <Check text="Good match time" checked={goodTime} setChecked={setGoodTime} />
-          <Check text="Opponent has star player" checked={hasStar} setChecked={setHasStar} />
-          <Check text="Derby match" checked={isDerby} setChecked={setIsDerby} />
+          <Check text="Выходной день" checked={выходнойДень} setChecked={setВыходнойДень} />
+          <Check text="Удобное время матча" checked={удобноеВремя} setChecked={setУдобноеВремя} />
+          <Check text="Есть звезда у соперника" checked={естьЗвезда} setChecked={setЕстьЗвезда} />
+          <Check text="Дерби" checked={дерби} setChecked={setДерби} />
         </div>
 
         <div style={styles.panel}>
-          <h3>Applied coefficients</h3>
-          {result.factors.map((f, i) => (
+          <h3>Применённые коэффициенты</h3>
+
+          {результат.коэффициенты.map((f, i) => (
             <div key={i} style={styles.factor}>
               <span>{f.name}</span>
               <b>x{f.coef}</b>
@@ -180,9 +225,22 @@ export default function Home() {
   );
 }
 
-function Kpi({ title, value, highlight = false }: { title: string; value: string; highlight?: boolean }) {
+function Kpi({
+  title,
+  value,
+  highlight = false,
+}: {
+  title: string;
+  value: string;
+  highlight?: boolean;
+}) {
   return (
-    <div style={{ ...styles.kpi, borderColor: highlight ? "#27e6a1" : "rgba(255,255,255,0.08)" }}>
+    <div
+      style={{
+        ...styles.kpi,
+        borderColor: highlight ? "#27e6a1" : "rgba(255,255,255,0.08)",
+      }}
+    >
       <span style={styles.cardLabel}>{title}</span>
       <strong style={styles.kpiValue}>{value}</strong>
     </div>
@@ -193,14 +251,31 @@ function Label({ text }: { text: string }) {
   return <p style={styles.label}>{text}</p>;
 }
 
-function Slider({ label, value, setValue, min = 0, max, suffix = "" }: any) {
+function Slider({
+  label,
+  value,
+  setValue,
+  min = 0,
+  max,
+  suffix = "",
+}: any) {
   return (
     <div style={{ marginTop: 18 }}>
       <div style={styles.sliderTop}>
         <span>{label}</span>
-        <b>{value}{suffix}</b>
+        <b>
+          {value}
+          {suffix}
+        </b>
       </div>
-      <input style={styles.range} type="range" min={min} max={max} value={value} onChange={(e) => setValue(Number(e.target.value))} />
+      <input
+        style={styles.range}
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => setValue(Number(e.target.value))}
+      />
     </div>
   );
 }
@@ -208,7 +283,11 @@ function Slider({ label, value, setValue, min = 0, max, suffix = "" }: any) {
 function Check({ text, checked, setChecked }: any) {
   return (
     <label style={styles.check}>
-      <input type="checkbox" checked={checked} onChange={() => setChecked(!checked)} />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={() => setChecked(!checked)}
+      />{" "}
       {text}
     </label>
   );
@@ -217,7 +296,8 @@ function Check({ text, checked, setChecked }: any) {
 const styles: any = {
   page: {
     minHeight: "100vh",
-    background: "radial-gradient(circle at top left, #1f2a44, #080b12 45%, #05060a)",
+    background:
+      "radial-gradient(circle at top left, #1f2a44, #080b12 45%, #05060a)",
     color: "#fff",
     padding: 36,
     fontFamily: "Inter, Arial, sans-serif",
