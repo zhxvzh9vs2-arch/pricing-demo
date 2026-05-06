@@ -31,7 +31,6 @@ export default function Home() {
   const [местоКоманды, setМестоКоманды] = useState(5);
   const [местоСоперника, setМестоСоперника] = useState(3);
   const [победнаяСерия, setПобеднаяСерия] = useState(1);
-  const [симуляцияАктивна, setСимуляцияАктивна] = useState(false);
 
   const категорияМеста =
     категорииМест.find((s) => s.id === категорияМестаId) || категорииМест[0];
@@ -139,26 +138,6 @@ export default function Home() {
     ...результат.график.map((p) => p.price)
   );
 
-  const запуститьСимуляцию = () => {
-    if (симуляцияАктивна) return;
-
-    setСимуляцияАктивна(true);
-
-    let шаг = 0;
-
-    const interval = setInterval(() => {
-      шаг += 1;
-
-      setПродано((prev) => Math.min(96, prev + 7));
-      setДнейДоМатча((prev) => Math.max(0, prev - 1));
-
-      if (шаг >= 8) {
-        clearInterval(interval);
-        setСимуляцияАктивна(false);
-      }
-    }, 900);
-  };
-
   return (
     <main style={styles.page}>
       <section style={styles.hero}>
@@ -169,10 +148,6 @@ export default function Home() {
             Система автоматически рассчитывает стоимость билета на основе спроса,
             времени до матча, категории события, соперника и спортивных факторов.
           </p>
-
-          <button style={styles.button} onClick={запуститьСимуляцию}>
-            {симуляцияАктивна ? "Симуляция запущена..." : "Симулировать день матча"}
-          </button>
         </div>
 
         <div style={styles.priceCard}>
@@ -268,9 +243,7 @@ export default function Home() {
                   ? "#22c55e"
                   : "#3b82f6";
 
-              const цена = Math.round(
-                sector.base * (1 + sector.demand / 100)
-              );
+              const цена = Math.round(sector.base * (1 + sector.demand / 100));
 
               return (
                 <div
@@ -282,7 +255,7 @@ export default function Home() {
                   }}
                 >
                   <b>{sector.name}</b>
-                  <span>{sector.demand}%</span>
+                  <span>{sector.demand}% спрос</span>
                   <small>{цена.toLocaleString()} ₽</small>
                 </div>
               );
@@ -448,16 +421,6 @@ const styles: any = {
     color: "#aeb7c7",
     fontSize: 18,
     lineHeight: 1.5,
-  },
-  button: {
-    marginTop: 22,
-    padding: "14px 20px",
-    borderRadius: 16,
-    border: "none",
-    background: "linear-gradient(135deg, #27e6a1, #3b82f6)",
-    color: "#041018",
-    fontWeight: 800,
-    cursor: "pointer",
   },
   priceCard: {
     background: "rgba(255,255,255,0.08)",
