@@ -8,17 +8,6 @@ const категорииМест = [
   { id: 14, name: "Эконом", base: 450 },
 ];
 
-const сектораАрены = [
-  { name: "A1", demand: 92, base: 3000 },
-  { name: "A2", demand: 84, base: 2500 },
-  { name: "B1", demand: 67, base: 1800 },
-  { name: "B2", demand: 58, base: 1500 },
-  { name: "C1", demand: 43, base: 1000 },
-  { name: "C2", demand: 35, base: 800 },
-  { name: "D1", demand: 22, base: 500 },
-  { name: "D2", demand: 18, base: 450 },
-];
-
 export default function Home() {
   const [категорияМестаId, setКатегорияМестаId] = useState(1);
   const [категорияМатча, setКатегорияМатча] = useState(1);
@@ -162,9 +151,19 @@ export default function Home() {
       </section>
 
       <section style={styles.kpiGrid}>
-        <Kpi title="Базовая выручка" value={`${результат.выручкаФикс.toLocaleString()} ₽`} />
-        <Kpi title="Динамическая выручка" value={`${результат.выручкаДинамическая.toLocaleString()} ₽`} />
-        <Kpi title="Дополнительная выручка" value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`} highlight />
+        <Kpi
+          title="Базовая выручка"
+          value={`${результат.выручкаФикс.toLocaleString()} ₽`}
+        />
+        <Kpi
+          title="Динамическая выручка"
+          value={`${результат.выручкаДинамическая.toLocaleString()} ₽`}
+        />
+        <Kpi
+          title="Дополнительная выручка"
+          value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`}
+          highlight
+        />
         <Kpi title="Продано билетов" value={`${продано}%`} />
       </section>
 
@@ -196,11 +195,39 @@ export default function Home() {
             <option value={3}>3 категория — низкий спрос</option>
           </select>
 
-          <Slider label="Продано билетов" value={продано} max={100} setValue={setПродано} suffix="%" />
-          <Slider label="Дней до матча" value={днейДоМатча} max={60} setValue={setДнейДоМатча} />
-          <Slider label="Место команды" value={местоКоманды} min={1} max={12} setValue={setМестоКоманды} />
-          <Slider label="Место соперника" value={местоСоперника} min={1} max={12} setValue={setМестоСоперника} />
-          <Slider label="Победная серия" value={победнаяСерия} max={5} setValue={setПобеднаяСерия} />
+          <Slider
+            label="Продано билетов"
+            value={продано}
+            max={100}
+            setValue={setПродано}
+            suffix="%"
+          />
+          <Slider
+            label="Дней до матча"
+            value={днейДоМатча}
+            max={60}
+            setValue={setДнейДоМатча}
+          />
+          <Slider
+            label="Место команды"
+            value={местоКоманды}
+            min={1}
+            max={12}
+            setValue={setМестоКоманды}
+          />
+          <Slider
+            label="Место соперника"
+            value={местоСоперника}
+            min={1}
+            max={12}
+            setValue={setМестоСоперника}
+          />
+          <Slider
+            label="Победная серия"
+            value={победнаяСерия}
+            max={5}
+            setValue={setПобеднаяСерия}
+          />
         </div>
 
         <div style={styles.panel}>
@@ -230,65 +257,119 @@ export default function Home() {
 
       <section style={styles.grid}>
         <div style={styles.panel}>
-          <h3>Heatmap арены</h3>
+          <h3>Heatmap арены «Мегаспорт»</h3>
 
-          <div style={styles.arenaMap}>
-  <div
-    style={{
-      ...styles.arenaSector,
-      ...styles.topSector,
-      background: "#ef4444",
-    }}
-  >
-    <b>A1</b>
-    <span>92% спрос</span>
-    <small>5 760 ₽</small>
-  </div>
+          <div style={styles.megasportMap}>
+            <div style={styles.mapRow}>
+              {["A21", "A22", "A23", "A24"].map((s, i) => (
+                <Sector
+                  key={s}
+                  name={s}
+                  demand={[45, 52, 61, 48][i]}
+                  base={[1200, 1400, 1400, 1200][i]}
+                />
+              ))}
+            </div>
 
-  <div
-    style={{
-      ...styles.arenaSector,
-      ...styles.leftSector,
-      background: "#f59e0b",
-    }}
-  >
-    <b>B1</b>
-    <span>67% спрос</span>
-    <small>3 006 ₽</small>
-  </div>
+            <div style={styles.mapRow}>
+              {["A1", "A2", "A0", "A3", "A4"].map((s, i) => (
+                <Sector
+                  key={s}
+                  name={s}
+                  demand={[72, 83, 94, 86, 74][i]}
+                  base={[3000, 4500, 8000, 4500, 3000][i]}
+                />
+              ))}
+            </div>
 
-  <div style={styles.ice}>
-    <span>АРЕНА</span>
-    <small>Матч</small>
-  </div>
+            <div style={styles.middleArena}>
+              <div style={styles.sideColumn}>
+                {["D21", "D22", "D23", "D24"].map((s, i) => (
+                  <Sector
+                    key={s}
+                    name={s}
+                    demand={[28, 34, 39, 31][i]}
+                    base={[900, 1000, 1000, 900][i]}
+                  />
+                ))}
+              </div>
 
-  <div
-    style={{
-      ...styles.arenaSector,
-      ...styles.rightSector,
-      background: "#22c55e",
-    }}
-  >
-    <b>C1</b>
-    <span>43% спрос</span>
-    <small>1 430 ₽</small>
-  </div>
+              <div style={styles.sideColumn}>
+                {["D1", "D2", "D3", "D4"].map((s, i) => (
+                  <Sector
+                    key={s}
+                    name={s}
+                    demand={[46, 57, 62, 51][i]}
+                    base={[1200, 1500, 1500, 1200][i]}
+                  />
+                ))}
+              </div>
 
-  <div
-    style={{
-      ...styles.arenaSector,
-      ...styles.bottomSector,
-      background: "#3b82f6",
-    }}
-  >
-    <b>D1</b>
-    <span>22% спрос</span>
-    <small>610 ₽</small>
-  </div>
-</div>
+              <div style={styles.iceRink}>
+                <span>МЕГАСПОРТ</span>
+                <small>хоккейная конфигурация</small>
+              </div>
+
+              <div style={styles.sideColumn}>
+                {["B1", "B2", "B3", "B4"].map((s, i) => (
+                  <Sector
+                    key={s}
+                    name={s}
+                    demand={[68, 76, 73, 64][i]}
+                    base={[2000, 2500, 2500, 2000][i]}
+                  />
+                ))}
+              </div>
+
+              <div style={styles.sideColumn}>
+                {["B21", "B22", "B23", "B24"].map((s, i) => (
+                  <Sector
+                    key={s}
+                    name={s}
+                    demand={[38, 44, 49, 41][i]}
+                    base={[1000, 1200, 1200, 1000][i]}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div style={styles.mapRow}>
+              {["C1", "C2", "C0", "C3", "C4"].map((s, i) => (
+                <Sector
+                  key={s}
+                  name={s}
+                  demand={[71, 82, 91, 84, 70][i]}
+                  base={[3000, 4500, 8000, 4500, 3000][i]}
+                />
+              ))}
+            </div>
+
+            <div style={styles.mapRow}>
+              {["C21", "C22", "C23", "C24"].map((s, i) => (
+                <Sector
+                  key={s}
+                  name={s}
+                  demand={[42, 55, 58, 44][i]}
+                  base={[1200, 1400, 1400, 1200][i]}
+                />
+              ))}
+            </div>
+
+            <div style={styles.vipRow}>
+              {["VIP A", "VIP B", "VIP C"].map((s, i) => (
+                <Sector
+                  key={s}
+                  name={s}
+                  demand={[88, 79, 86][i]}
+                  base={[12000, 10000, 12000][i]}
+                />
+              ))}
+            </div>
+          </div>
 
           <p style={styles.hint}>
-            Красные сектора — высокий спрос. Синие — низкий спрос.
+            Цвет показывает уровень спроса по сектору: красный — высокий спрос,
+            синий — низкий.
           </p>
         </div>
 
@@ -322,9 +403,21 @@ export default function Home() {
         <div style={styles.panel}>
           <h3>Факторы спроса</h3>
 
-          <Check text="Выходной день" checked={выходнойДень} setChecked={setВыходнойДень} />
-          <Check text="Удобное время матча" checked={удобноеВремя} setChecked={setУдобноеВремя} />
-          <Check text="Есть звезда у соперника" checked={естьЗвезда} setChecked={setЕстьЗвезда} />
+          <Check
+            text="Выходной день"
+            checked={выходнойДень}
+            setChecked={setВыходнойДень}
+          />
+          <Check
+            text="Удобное время матча"
+            checked={удобноеВремя}
+            setChecked={setУдобноеВремя}
+          />
+          <Check
+            text="Есть звезда у соперника"
+            checked={естьЗвезда}
+            setChecked={setЕстьЗвезда}
+          />
           <Check text="Дерби" checked={дерби} setChecked={setДерби} />
         </div>
 
@@ -340,6 +433,41 @@ export default function Home() {
         </div>
       </section>
     </main>
+  );
+}
+
+function Sector({
+  name,
+  demand,
+  base,
+}: {
+  name: string;
+  demand: number;
+  base: number;
+}) {
+  const color =
+    demand > 80
+      ? "#ef4444"
+      : demand > 60
+      ? "#f59e0b"
+      : demand > 40
+      ? "#22c55e"
+      : "#3b82f6";
+
+  const price = Math.round(base * (1 + demand / 100));
+
+  return (
+    <div
+      style={{
+        ...styles.megasportSector,
+        background: color,
+        boxShadow: `0 0 22px ${color}66`,
+      }}
+    >
+      <b>{name}</b>
+      <span>{demand}%</span>
+      <small>{price.toLocaleString()} ₽</small>
+    </div>
   );
 }
 
@@ -545,21 +673,62 @@ const styles: any = {
   hint: {
     color: "#8e9bb0",
   },
-  arena: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: 14,
+  megasportMap: {
     marginTop: 20,
+    padding: 20,
+    borderRadius: 28,
+    background:
+      "radial-gradient(circle at center, rgba(255,255,255,0.09), rgba(255,255,255,0.025))",
+    border: "1px solid rgba(255,255,255,0.1)",
   },
-  sector: {
-    minHeight: 95,
-    borderRadius: 18,
-    padding: 16,
+  mapRow: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  middleArena: {
+    display: "grid",
+    gridTemplateColumns: "72px 72px 1fr 72px 72px",
+    gap: 8,
+    alignItems: "center",
+    margin: "8px 0",
+  },
+  sideColumn: {
+    display: "grid",
+    gap: 8,
+  },
+  iceRink: {
+    minHeight: 260,
+    borderRadius: 120,
+    border: "2px solid rgba(255,255,255,0.35)",
+    background:
+      "linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontWeight: 900,
+    letterSpacing: "1px",
+  },
+  megasportSector: {
+    width: 66,
+    height: 58,
+    borderRadius: 12,
+    padding: 7,
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
     color: "#fff",
-    fontWeight: 700,
+    fontWeight: 800,
+    fontSize: 11,
+  },
+  vipRow: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 12,
   },
   aiBox: {
     marginTop: 18,
@@ -572,73 +741,7 @@ const styles: any = {
   aiTitle: {
     fontSize: 34,
     margin: "12px 0",
-  },arenaMap: {
-  position: "relative",
-  height: 360,
-  marginTop: 24,
-  borderRadius: 28,
-  background:
-    "radial-gradient(circle, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
-  border: "1px solid rgba(255,255,255,0.1)",
-  overflow: "hidden",
-},
-
-ice: {
-  position: "absolute",
-  left: "50%",
-  top: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 210,
-  height: 110,
-  borderRadius: 60,
-  border: "2px solid rgba(255,255,255,0.35)",
-  background: "rgba(255,255,255,0.08)",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "#fff",
-  fontWeight: 800,
-  letterSpacing: "1px",
-},
-
-arenaSector: {
-  position: "absolute",
-  padding: 14,
-  borderRadius: 20,
-  minWidth: 115,
-  minHeight: 72,
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-  color: "#fff",
-  fontWeight: 700,
-  boxShadow: "0 0 30px rgba(255,255,255,0.12)",
-},
-
-topSector: {
-  left: "50%",
-  top: 24,
-  transform: "translateX(-50%)",
-},
-
-bottomSector: {
-  left: "50%",
-  bottom: 24,
-  transform: "translateX(-50%)",
-},
-
-leftSector: {
-  left: 24,
-  top: "50%",
-  transform: "translateY(-50%)",
-},
-
-rightSector: {
-  right: 24,
-  top: "50%",
-  transform: "translateY(-50%)",
-},
+  },
   check: {
     display: "block",
     marginBottom: 14,
