@@ -3,13 +3,13 @@
 import { useMemo, useState } from "react";
 
 const seatCategories = [
-  { id: 1, name: "Категория 1", base: 3000 },
-  { id: 6, name: "Категория 6", base: 1000 },
-  { id: 14, name: "Категория 14", base: 450 },
+  { id: 1, name: "Premium Center", base: 3000 },
+  { id: 6, name: "Standard", base: 1000 },
+  { id: 14, name: "Economy", base: 450 },
 ];
 
 export default function Home() {
-  const [seat, setSeat] = useState(seatCategories[0]);
+  const [seatId, setSeatId] = useState(1);
   const [matchCategory, setMatchCategory] = useState(1);
   const [sold, setSold] = useState(35);
   const [days, setDays] = useState(10);
@@ -21,6 +21,8 @@ export default function Home() {
   const [opponentPlace, setOpponentPlace] = useState(3);
   const [winStreak, setWinStreak] = useState(1);
 
+  const seat = seatCategories.find((s) => s.id === seatId) || seatCategories[0];
+
   const result = useMemo(() => {
     let price = seat.base;
     const factors: { name: string; coef: number }[] = [];
@@ -30,39 +32,46 @@ export default function Home() {
       factors.push({ name, coef });
     };
 
-    if (matchCategory === 1) add("Категория матча 1", 2);
-    if (matchCategory === 2) add("Категория матча 2", 1.5);
-    if (matchCategory === 3) add("Категория матча 3", 1);
+    if (matchCategory === 1) add("Match category", 2);
+    if (matchCategory === 2) add("Match category", 1.5);
+    if (matchCategory === 3) add("Match category", 1);
 
-    add("День недели", isWeekend ? 1.1 : 0.9);
-    add("Время матча", goodTime ? 1.05 : 0.95);
+    add("Day of week", isWeekend ? 1.1 : 0.9);
+    add("Match time", goodTime ? 1.05 : 0.95);
 
-    if (hasStar) add("Звезда у соперника", 1.1);
-    if (isDerby) add("Дерби", 1.15);
+    if (hasStar) add("Opponent star player", 1.1);
+    if (isDerby) add("Derby factor", 1.15);
 
-    if (teamPlace <= 3) add("Положение команды", 1.15);
-    else if (teamPlace <= 8) add("Положение команды", 1.05);
-    else add("Положение команды", 0.95);
+    if (teamPlace <= 3) add("Team position", 1.15);
+    else if (teamPlace <= 8) add("Team position", 1.05);
+    else add("Team position", 0.95);
 
-    if (opponentPlace <= 3) add("Положение соперника", 1.15);
-    else if (opponentPlace <= 8) add("Положение соперника", 1.05);
-    else add("Положение соперника", 0.95);
+    if (opponentPlace <= 3) add("Opponent position", 1.15);
+    else if (opponentPlace <= 8) add("Opponent position", 1.05);
+    else add("Opponent position", 0.95);
 
-    if (winStreak >= 3) add("Победная серия", 1.1);
-    else if (winStreak === 0) add("Нет победной серии", 0.95);
+    if (winStreak >= 3) add("Winning streak", 1.1);
+    else if (winStreak === 0) add("No winning streak", 0.95);
 
-    if (sold > 30) add("Продано более 30%", 1.1);
-    if (sold > 50) add("Продано более 50%", 1.15);
-    if (sold > 70) add("Продано более 70%", 1.25);
-    if (sold > 85) add("Дефицит билетов", 1.2);
+    if (sold > 30) add("Demand > 30%", 1.1);
+    if (sold > 50) add("Demand > 50%", 1.15);
+    if (sold > 70) add("Demand > 70%", 1.25);
+    if (sold > 85) add("Ticket scarcity", 1.2);
 
-    if (days < 7) add("Меньше 7 дней до матча", 1.1);
-    if (days < 2) add("Меньше 2 дней до матча", 1.2);
+    if (days < 7) add("Less than 7 days", 1.1);
+    if (days < 2) add("Less than 2 days", 1.2);
 
     const finalPrice = Math.round(price);
-    const baseRevenue = seat.base * 500;
-    const dynamicRevenue = finalPrice * 500;
+    const tickets = 500;
+    const baseRevenue = seat.base * tickets;
+    const dynamicRevenue = finalPrice * tickets;
     const revenueGrowth = dynamicRevenue - baseRevenue;
+
+    const chart = Array.from({ length: 8 }, (_, i) => {
+      const demand = Math.min(100, 10 + i * 12 + sold / 5);
+      const chartPrice = Math.round(seat.base * (1 + demand / 100) * (matchCategory === 1 ? 1.6 : matchCategory === 2 ? 1.25 : 1));
+      return { demand, price: chartPrice };
+    });
 
     return {
       finalPrice,
@@ -71,107 +80,283 @@ export default function Home() {
       dynamicRevenue,
       revenueGrowth,
       factors,
+      chart,
     };
-  }, [
-    seat,
-    matchCategory,
-    sold,
-    days,
-    isWeekend,
-    goodTime,
-    hasStar,
-    isDerby,
-    teamPlace,
-    opponentPlace,
-    winStreak,
-  ]);
+  }, [seat, matchCategory, sold, days, isWeekend, goodTime, hasStar, isDerby, teamPlace, opponentPlace, winStreak]);
+
+  const maxChartPrice = Math.max(...result.chart.map((p) => p.price));
 
   return (
-    <main style={{ padding: 40, fontFamily: "Arial", background: "#f5f5f5", minHeight: "100vh" }}>
-      <h1>Dynamic Ticket Pricing</h1>
-      <p>Демо-система автоматического изменения цены билета</p>
+    <main style={styles.page}>
+      <section style={styles.hero}>
+        <div>
+          <div style={styles.badge}>AI Ticket Revenue Engine</div>
+          <h1 style={styles.title}>Dynamic Pricing Platform</h1>
+          <p style={styles.subtitle}>
+            Автоматическое изменение цены билетов на основе спроса, времени до матча,
+            категории события и спортивных факторов.
+          </p>
+        </div>
 
-      <section style={{ background: "white", padding: 24, borderRadius: 20, marginTop: 24 }}>
-        <h2>Матч: Спартак vs ЦСКА</h2>
-
-        <h3>Текущая цена: {result.finalPrice.toLocaleString()} ₽</h3>
-        <p>Рост к базовой цене: +{result.growthPercent}%</p>
-        <p>Прогноз дополнительной выручки: {result.revenueGrowth.toLocaleString()} ₽</p>
+        <div style={styles.priceCard}>
+          <span style={styles.cardLabel}>Current recommended price</span>
+          <h2 style={styles.price}>{result.finalPrice.toLocaleString()} ₽</h2>
+          <p style={styles.green}>+{result.growthPercent}% к базовой цене</p>
+        </div>
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 24 }}>
-        <div style={{ background: "white", padding: 24, borderRadius: 20 }}>
-          <h3>Настройки матча</h3>
+      <section style={styles.kpiGrid}>
+        <Kpi title="Base revenue" value={`${result.baseRevenue.toLocaleString()} ₽`} />
+        <Kpi title="Dynamic revenue" value={`${result.dynamicRevenue.toLocaleString()} ₽`} />
+        <Kpi title="Additional revenue" value={`${result.revenueGrowth.toLocaleString()} ₽`} highlight />
+        <Kpi title="Tickets sold" value={`${sold}%`} />
+      </section>
 
-          <label>Категория места</label>
-          <select
-            style={{ width: "100%", padding: 12, margin: "8px 0 16px" }}
-            onChange={(e) => setSeat(seatCategories.find(s => s.id === Number(e.target.value))!)}
-          >
-            {seatCategories.map(s => (
+      <section style={styles.grid}>
+        <div style={styles.panel}>
+          <h3>Match settings</h3>
+
+          <Label text="Seat category" />
+          <select style={styles.select} value={seatId} onChange={(e) => setSeatId(Number(e.target.value))}>
+            {seatCategories.map((s) => (
               <option key={s.id} value={s.id}>{s.name} — {s.base} ₽</option>
             ))}
           </select>
 
-          <label>Категория матча</label>
-          <select
-            style={{ width: "100%", padding: 12, margin: "8px 0 16px" }}
-            value={matchCategory}
-            onChange={(e) => setMatchCategory(Number(e.target.value))}
-          >
-            <option value={1}>1 категория</option>
-            <option value={2}>2 категория</option>
-            <option value={3}>3 категория</option>
+          <Label text="Match category" />
+          <select style={styles.select} value={matchCategory} onChange={(e) => setMatchCategory(Number(e.target.value))}>
+            <option value={1}>Category 1 — top demand</option>
+            <option value={2}>Category 2 — medium demand</option>
+            <option value={3}>Category 3 — low demand</option>
           </select>
 
-          <label>Продано билетов: {sold}%</label>
-          <input type="range" min="0" max="100" value={sold} onChange={(e) => setSold(Number(e.target.value))} />
-
-          <br /><br />
-
-          <label>Дней до матча: {days}</label>
-          <input type="range" min="0" max="60" value={days} onChange={(e) => setDays(Number(e.target.value))} />
-
-          <br /><br />
-
-          <label>Место команды: {teamPlace}</label>
-          <input type="range" min="1" max="12" value={teamPlace} onChange={(e) => setTeamPlace(Number(e.target.value))} />
-
-          <br /><br />
-
-          <label>Место соперника: {opponentPlace}</label>
-          <input type="range" min="1" max="12" value={opponentPlace} onChange={(e) => setOpponentPlace(Number(e.target.value))} />
-
-          <br /><br />
-
-          <label>Победная серия: {winStreak}</label>
-          <input type="range" min="0" max="5" value={winStreak} onChange={(e) => setWinStreak(Number(e.target.value))} />
+          <Slider label="Tickets sold" value={sold} max={100} setValue={setSold} suffix="%" />
+          <Slider label="Days to match" value={days} max={60} setValue={setDays} />
+          <Slider label="Team position" value={teamPlace} min={1} max={12} setValue={setTeamPlace} />
+          <Slider label="Opponent position" value={opponentPlace} min={1} max={12} setValue={setOpponentPlace} />
+          <Slider label="Winning streak" value={winStreak} max={5} setValue={setWinStreak} />
         </div>
 
-        <div style={{ background: "white", padding: 24, borderRadius: 20 }}>
-          <h3>Факторы</h3>
+        <div style={styles.panel}>
+          <h3>Revenue forecast</h3>
+          <div style={styles.chart}>
+            {result.chart.map((point, i) => (
+              <div key={i} style={styles.barWrap}>
+                <div
+                  style={{
+                    ...styles.bar,
+                    height: `${(point.price / maxChartPrice) * 190}px`,
+                  }}
+                />
+                <span style={styles.barLabel}>{point.price}</span>
+              </div>
+            ))}
+          </div>
+          <p style={styles.hint}>График показывает рост рекомендованной цены при увеличении спроса.</p>
+        </div>
+      </section>
 
-          <p><input type="checkbox" checked={isWeekend} onChange={() => setIsWeekend(!isWeekend)} /> Выходной день</p>
-          <p><input type="checkbox" checked={goodTime} onChange={() => setGoodTime(!goodTime)} /> Удобное время матча</p>
-          <p><input type="checkbox" checked={hasStar} onChange={() => setHasStar(!hasStar)} /> Есть звезда у соперника</p>
-          <p><input type="checkbox" checked={isDerby} onChange={() => setIsDerby(!isDerby)} /> Дерби</p>
+      <section style={styles.grid}>
+        <div style={styles.panel}>
+          <h3>Active factors</h3>
 
-          <h3>Применённые коэффициенты</h3>
+          <Check text="Weekend match" checked={isWeekend} setChecked={setIsWeekend} />
+          <Check text="Good match time" checked={goodTime} setChecked={setGoodTime} />
+          <Check text="Opponent has star player" checked={hasStar} setChecked={setHasStar} />
+          <Check text="Derby match" checked={isDerby} setChecked={setIsDerby} />
+        </div>
+
+        <div style={styles.panel}>
+          <h3>Applied coefficients</h3>
           {result.factors.map((f, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #eee", padding: "8px 0" }}>
+            <div key={i} style={styles.factor}>
               <span>{f.name}</span>
               <b>x{f.coef}</b>
             </div>
           ))}
         </div>
       </section>
-
-      <section style={{ background: "white", padding: 24, borderRadius: 20, marginTop: 24 }}>
-        <h3>Сравнение выручки</h3>
-        <p>Фиксированная цена: {result.baseRevenue.toLocaleString()} ₽</p>
-        <p>Динамическая цена: {result.dynamicRevenue.toLocaleString()} ₽</p>
-        <p><b>Дополнительная выручка: {result.revenueGrowth.toLocaleString()} ₽</b></p>
-      </section>
     </main>
   );
 }
+
+function Kpi({ title, value, highlight = false }: { title: string; value: string; highlight?: boolean }) {
+  return (
+    <div style={{ ...styles.kpi, borderColor: highlight ? "#27e6a1" : "rgba(255,255,255,0.08)" }}>
+      <span style={styles.cardLabel}>{title}</span>
+      <strong style={styles.kpiValue}>{value}</strong>
+    </div>
+  );
+}
+
+function Label({ text }: { text: string }) {
+  return <p style={styles.label}>{text}</p>;
+}
+
+function Slider({ label, value, setValue, min = 0, max, suffix = "" }: any) {
+  return (
+    <div style={{ marginTop: 18 }}>
+      <div style={styles.sliderTop}>
+        <span>{label}</span>
+        <b>{value}{suffix}</b>
+      </div>
+      <input style={styles.range} type="range" min={min} max={max} value={value} onChange={(e) => setValue(Number(e.target.value))} />
+    </div>
+  );
+}
+
+function Check({ text, checked, setChecked }: any) {
+  return (
+    <label style={styles.check}>
+      <input type="checkbox" checked={checked} onChange={() => setChecked(!checked)} />
+      {text}
+    </label>
+  );
+}
+
+const styles: any = {
+  page: {
+    minHeight: "100vh",
+    background: "radial-gradient(circle at top left, #1f2a44, #080b12 45%, #05060a)",
+    color: "#fff",
+    padding: 36,
+    fontFamily: "Inter, Arial, sans-serif",
+  },
+  hero: {
+    display: "grid",
+    gridTemplateColumns: "1.5fr 1fr",
+    gap: 24,
+    marginBottom: 24,
+  },
+  badge: {
+    display: "inline-block",
+    padding: "8px 12px",
+    borderRadius: 999,
+    background: "rgba(39,230,161,0.12)",
+    color: "#27e6a1",
+    fontSize: 13,
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 56,
+    lineHeight: 1,
+    margin: 0,
+    letterSpacing: "-2px",
+  },
+  subtitle: {
+    maxWidth: 680,
+    color: "#aeb7c7",
+    fontSize: 18,
+    lineHeight: 1.5,
+  },
+  priceCard: {
+    background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 28,
+    padding: 28,
+    backdropFilter: "blur(20px)",
+  },
+  cardLabel: {
+    color: "#8e9bb0",
+    fontSize: 14,
+  },
+  price: {
+    fontSize: 52,
+    margin: "14px 0 6px",
+  },
+  green: {
+    color: "#27e6a1",
+    margin: 0,
+  },
+  kpiGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: 16,
+    marginBottom: 24,
+  },
+  kpi: {
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 22,
+    padding: 22,
+  },
+  kpiValue: {
+    display: "block",
+    fontSize: 24,
+    marginTop: 10,
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 24,
+    marginBottom: 24,
+  },
+  panel: {
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 28,
+    padding: 24,
+    backdropFilter: "blur(18px)",
+  },
+  label: {
+    color: "#aeb7c7",
+    marginBottom: 8,
+  },
+  select: {
+    width: "100%",
+    padding: 14,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "#101623",
+    color: "#fff",
+    marginBottom: 16,
+  },
+  sliderTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    color: "#dce3ef",
+  },
+  range: {
+    width: "100%",
+  },
+  chart: {
+    height: 260,
+    display: "flex",
+    alignItems: "end",
+    gap: 18,
+    paddingTop: 30,
+  },
+  barWrap: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "end",
+  },
+  bar: {
+    width: "100%",
+    borderRadius: "14px 14px 4px 4px",
+    background: "linear-gradient(180deg, #27e6a1, #3b82f6)",
+    boxShadow: "0 0 30px rgba(39,230,161,0.25)",
+  },
+  barLabel: {
+    marginTop: 8,
+    color: "#8e9bb0",
+    fontSize: 12,
+  },
+  hint: {
+    color: "#8e9bb0",
+  },
+  check: {
+    display: "block",
+    marginBottom: 14,
+    color: "#dce3ef",
+  },
+  factor: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "12px 0",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    color: "#dce3ef",
+  },
+};
