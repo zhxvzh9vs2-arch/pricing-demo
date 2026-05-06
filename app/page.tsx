@@ -232,35 +232,60 @@ export default function Home() {
         <div style={styles.panel}>
           <h3>Heatmap арены</h3>
 
-          <div style={styles.arena}>
-            {сектораАрены.map((sector) => {
-              const цвет =
-                sector.demand > 80
-                  ? "#ef4444"
-                  : sector.demand > 55
-                  ? "#f59e0b"
-                  : sector.demand > 35
-                  ? "#22c55e"
-                  : "#3b82f6";
+          <div style={styles.arenaMap}>
+  <div
+    style={{
+      ...styles.arenaSector,
+      ...styles.topSector,
+      background: "#ef4444",
+    }}
+  >
+    <b>A1</b>
+    <span>92% спрос</span>
+    <small>5 760 ₽</small>
+  </div>
 
-              const цена = Math.round(sector.base * (1 + sector.demand / 100));
+  <div
+    style={{
+      ...styles.arenaSector,
+      ...styles.leftSector,
+      background: "#f59e0b",
+    }}
+  >
+    <b>B1</b>
+    <span>67% спрос</span>
+    <small>3 006 ₽</small>
+  </div>
 
-              return (
-                <div
-                  key={sector.name}
-                  style={{
-                    ...styles.sector,
-                    background: цвет,
-                    boxShadow: `0 0 28px ${цвет}66`,
-                  }}
-                >
-                  <b>{sector.name}</b>
-                  <span>{sector.demand}% спрос</span>
-                  <small>{цена.toLocaleString()} ₽</small>
-                </div>
-              );
-            })}
-          </div>
+  <div style={styles.ice}>
+    <span>АРЕНА</span>
+    <small>Матч</small>
+  </div>
+
+  <div
+    style={{
+      ...styles.arenaSector,
+      ...styles.rightSector,
+      background: "#22c55e",
+    }}
+  >
+    <b>C1</b>
+    <span>43% спрос</span>
+    <small>1 430 ₽</small>
+  </div>
+
+  <div
+    style={{
+      ...styles.arenaSector,
+      ...styles.bottomSector,
+      background: "#3b82f6",
+    }}
+  >
+    <b>D1</b>
+    <span>22% спрос</span>
+    <small>610 ₽</small>
+  </div>
+</div>
 
           <p style={styles.hint}>
             Красные сектора — высокий спрос. Синие — низкий спрос.
@@ -547,7 +572,73 @@ const styles: any = {
   aiTitle: {
     fontSize: 34,
     margin: "12px 0",
-  },
+  },arenaMap: {
+  position: "relative",
+  height: 360,
+  marginTop: 24,
+  borderRadius: 28,
+  background:
+    "radial-gradient(circle, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+  border: "1px solid rgba(255,255,255,0.1)",
+  overflow: "hidden",
+},
+
+ice: {
+  position: "absolute",
+  left: "50%",
+  top: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 210,
+  height: 110,
+  borderRadius: 60,
+  border: "2px solid rgba(255,255,255,0.35)",
+  background: "rgba(255,255,255,0.08)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#fff",
+  fontWeight: 800,
+  letterSpacing: "1px",
+},
+
+arenaSector: {
+  position: "absolute",
+  padding: 14,
+  borderRadius: 20,
+  minWidth: 115,
+  minHeight: 72,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  color: "#fff",
+  fontWeight: 700,
+  boxShadow: "0 0 30px rgba(255,255,255,0.12)",
+},
+
+topSector: {
+  left: "50%",
+  top: 24,
+  transform: "translateX(-50%)",
+},
+
+bottomSector: {
+  left: "50%",
+  bottom: 24,
+  transform: "translateX(-50%)",
+},
+
+leftSector: {
+  left: 24,
+  top: "50%",
+  transform: "translateY(-50%)",
+},
+
+rightSector: {
+  right: 24,
+  top: "50%",
+  transform: "translateY(-50%)",
+},
   check: {
     display: "block",
     marginBottom: 14,
