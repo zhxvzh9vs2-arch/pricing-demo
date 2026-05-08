@@ -173,7 +173,7 @@ export default function Home() {
     добавить("День недели", выходнойДень ? 1.1 : 0.95);
     добавить("Время матча", удобноеВремя ? 1.05 : 0.95);
 
-    if (естьЗвезда) добавить("Звезда в составе", 1.1);
+    if (лига === "КХЛ" && естьЗвезда) добавить("Звезда в составе", 1.1);
     if (дерби) добавить("Дерби / принципиальный матч", 1.15);
 
     if (местоКоманды <= 3) добавить("Высокое место клуба", 1.12);
@@ -255,6 +255,7 @@ export default function Home() {
     };
   }, [
     активнаяКатегория,
+    лига,
     категорияМатча,
     продано,
     днейДоМатча,
@@ -339,7 +340,6 @@ export default function Home() {
     <main style={styles.page}>
       <section style={styles.hero}>
         <div>
-          <div style={styles.badge}>AI-платформа для хоккейных клубов</div>
           <h1 style={styles.title}>Универсальная система управления ценами</h1>
           <p style={styles.subtitle}>
             MVP для КХЛ, ВХЛ, МХЛ и НМХЛ: клуб выбирает лигу, настраивает свои
@@ -535,7 +535,7 @@ export default function Home() {
             <InfoRow
               title="Текущий спрос"
               value={продано > 60 ? "Высокий" : продано > 35 ? "Средний" : "Низкий"}
-              color={продано > 60 ? "#ef4444" : продано > 35 ? "#f59e0b" : "#22c55e"}
+              color="#ffffff"
             />
             <InfoRow title="Confidence score" value={`${результат.confidence}%`} />
             <InfoRow title="Прогноз sold out" value={`${результат.вероятностьSoldOut}%`} />
@@ -556,7 +556,15 @@ export default function Home() {
           <h3>Факторы спроса</h3>
           <Check text="Выходной день" checked={выходнойДень} setChecked={setВыходнойДень} />
           <Check text="Удобное время" checked={удобноеВремя} setChecked={setУдобноеВремя} />
-          <Check text="Есть звезда у соперника" checked={естьЗвезда} setChecked={setЕстьЗвезда} />
+
+          {лига === "КХЛ" && (
+            <Check
+              text="Есть звезда у соперника"
+              checked={естьЗвезда}
+              setChecked={setЕстьЗвезда}
+            />
+          )}
+
           <Check text="Дерби / принципиальный матч" checked={дерби} setChecked={setДерби} />
         </div>
 
@@ -579,7 +587,7 @@ function Kpi({ title, value, highlight = false }: any) {
     <div
       style={{
         ...styles.kpi,
-        borderColor: highlight ? "#27e6a1" : "rgba(255,255,255,0.08)",
+        borderColor: highlight ? "#ffffff" : "#2a2a2a",
       }}
     >
       <span style={styles.cardLabel}>{title}</span>
@@ -619,7 +627,7 @@ function Check({ text, checked, setChecked }: any) {
   );
 }
 
-function InfoRow({ title, value, color = "#fff" }: any) {
+function InfoRow({ title, value, color = "#ffffff" }: any) {
   return (
     <div style={styles.aiRow}>
       <span>{title}</span>
@@ -631,8 +639,8 @@ function InfoRow({ title, value, color = "#fff" }: any) {
 const styles: any = {
   page: {
     minHeight: "100vh",
-    background: "radial-gradient(circle at top left, #1f2a44, #080b12 45%, #05060a)",
-    color: "#fff",
+    background: "#050505",
+    color: "#ffffff",
     padding: 36,
     fontFamily: "Inter, Arial, sans-serif",
   },
@@ -642,44 +650,36 @@ const styles: any = {
     gap: 24,
     marginBottom: 24,
   },
-  badge: {
-    display: "inline-block",
-    padding: "8px 12px",
-    borderRadius: 999,
-    background: "rgba(39,230,161,0.12)",
-    color: "#27e6a1",
-    fontSize: 13,
-    marginBottom: 16,
-  },
   title: {
     fontSize: 54,
     lineHeight: 1,
     margin: 0,
     letterSpacing: "-2px",
+    color: "#ffffff",
   },
   subtitle: {
     maxWidth: 760,
-    color: "#aeb7c7",
+    color: "#bdbdbd",
     fontSize: 18,
     lineHeight: 1.5,
   },
   priceCard: {
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.12)",
+    background: "#111111",
+    border: "1px solid #2a2a2a",
     borderRadius: 28,
     padding: 28,
-    backdropFilter: "blur(20px)",
   },
   cardLabel: {
-    color: "#8e9bb0",
+    color: "#9b9b9b",
     fontSize: 14,
   },
   price: {
     fontSize: 52,
     margin: "14px 0 6px",
+    color: "#ffffff",
   },
   green: {
-    color: "#27e6a1",
+    color: "#ffffff",
     margin: 0,
   },
   kpiGrid: {
@@ -689,8 +689,8 @@ const styles: any = {
     marginBottom: 24,
   },
   kpi: {
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: "#111111",
+    border: "1px solid #2a2a2a",
     borderRadius: 22,
     padding: 22,
   },
@@ -698,6 +698,7 @@ const styles: any = {
     display: "block",
     fontSize: 22,
     marginTop: 10,
+    color: "#ffffff",
   },
   grid: {
     display: "grid",
@@ -706,23 +707,22 @@ const styles: any = {
     marginBottom: 24,
   },
   panel: {
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "#111111",
+    border: "1px solid #2a2a2a",
     borderRadius: 28,
     padding: 24,
-    backdropFilter: "blur(18px)",
   },
   label: {
-    color: "#aeb7c7",
+    color: "#bdbdbd",
     marginBottom: 8,
   },
   select: {
     width: "100%",
     padding: 14,
     borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.12)",
-    background: "#101623",
-    color: "#fff",
+    border: "1px solid #333333",
+    background: "#050505",
+    color: "#ffffff",
     marginBottom: 16,
   },
   arenaInfo: {
@@ -730,20 +730,21 @@ const styles: any = {
     marginBottom: 18,
     padding: 18,
     borderRadius: 18,
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: "#0a0a0a",
+    border: "1px solid #2a2a2a",
     display: "flex",
     flexDirection: "column",
     gap: 6,
-    color: "#dce3ef",
+    color: "#dddddd",
   },
   sliderTop: {
     display: "flex",
     justifyContent: "space-between",
-    color: "#dce3ef",
+    color: "#dddddd",
   },
   range: {
     width: "100%",
+    accentColor: "#ffffff",
   },
   categoryList: {
     display: "flex",
@@ -760,34 +761,34 @@ const styles: any = {
   input: {
     padding: 12,
     borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.12)",
-    background: "#101623",
-    color: "#fff",
+    border: "1px solid #333333",
+    background: "#050505",
+    color: "#ffffff",
   },
   inputPrice: {
     padding: 12,
     borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.12)",
-    background: "#101623",
-    color: "#fff",
+    border: "1px solid #333333",
+    background: "#050505",
+    color: "#ffffff",
   },
   addButton: {
     marginTop: 18,
     width: "100%",
     padding: 14,
     borderRadius: 14,
-    border: "none",
-    background: "linear-gradient(135deg, #27e6a1, #3b82f6)",
-    color: "#061016",
+    border: "1px solid #ffffff",
+    background: "#ffffff",
+    color: "#000000",
     fontWeight: 800,
     cursor: "pointer",
   },
   deleteButton: {
     padding: 12,
     borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.12)",
-    background: "rgba(239,68,68,0.15)",
-    color: "#fff",
+    border: "1px solid #444444",
+    background: "#0a0a0a",
+    color: "#ffffff",
     cursor: "pointer",
   },
   salesTable: {
@@ -803,9 +804,9 @@ const styles: any = {
     alignItems: "center",
     padding: 14,
     borderRadius: 16,
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    color: "#dce3ef",
+    background: "#0a0a0a",
+    border: "1px solid #2a2a2a",
+    color: "#dddddd",
     fontSize: 13,
   },
   chart: {
@@ -825,16 +826,15 @@ const styles: any = {
   bar: {
     width: "100%",
     borderRadius: "14px 14px 4px 4px",
-    background: "linear-gradient(180deg, #27e6a1, #3b82f6)",
-    boxShadow: "0 0 30px rgba(39,230,161,0.25)",
+    background: "#ffffff",
   },
   barLabel: {
     marginTop: 8,
-    color: "#8e9bb0",
+    color: "#9b9b9b",
     fontSize: 12,
   },
   hint: {
-    color: "#8e9bb0",
+    color: "#9b9b9b",
   },
   aiEngine: {
     marginTop: 20,
@@ -847,27 +847,27 @@ const styles: any = {
     justifyContent: "space-between",
     padding: "18px 20px",
     borderRadius: 18,
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    color: "#dce3ef",
+    background: "#0a0a0a",
+    border: "1px solid #2a2a2a",
+    color: "#dddddd",
   },
   aiRecommendation: {
     marginTop: 10,
     padding: 24,
     borderRadius: 24,
-    background: "linear-gradient(135deg, rgba(39,230,161,0.14), rgba(59,130,246,0.14))",
-    border: "1px solid rgba(39,230,161,0.25)",
+    background: "#0a0a0a",
+    border: "1px solid #ffffff",
   },
   check: {
     display: "block",
     marginBottom: 14,
-    color: "#dce3ef",
+    color: "#dddddd",
   },
   factor: {
     display: "flex",
     justifyContent: "space-between",
     padding: "12px 0",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
-    color: "#dce3ef",
+    borderBottom: "1px solid #2a2a2a",
+    color: "#dddddd",
   },
 };
