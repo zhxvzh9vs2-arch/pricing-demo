@@ -90,6 +90,7 @@ const клубыПоЛигам: Record<string, Клуб[]> = {
 export default function Home() {
   const [лига, setЛига] = useState("КХЛ");
   const [клуб, setКлуб] = useState(клубыПоЛигам["КХЛ"][0].name);
+
   const выбранныйКлуб =
     клубыПоЛигам[лига].find((item) => item.name === клуб) ||
     клубыПоЛигам[лига][0];
@@ -97,10 +98,34 @@ export default function Home() {
   const [матчейВДомашнемСезоне, setМатчейВДомашнемСезоне] = useState(30);
 
   const [категорииЦен, setКатегорииЦен] = useState<КатегорияЦены[]>([
-    { id: 1, name: "VIP", base: 12000, seasonTicketPrice: 240000, minPriceManual: 8000 },
-    { id: 2, name: "Премиум", base: 5000, seasonTicketPrice: 120000, minPriceManual: 4000 },
-    { id: 3, name: "Стандарт", base: 2500, seasonTicketPrice: 60000, minPriceManual: 2000 },
-    { id: 4, name: "Эконом", base: 900, seasonTicketPrice: 24000, minPriceManual: 800 },
+    {
+      id: 1,
+      name: "VIP",
+      base: 12000,
+      seasonTicketPrice: 240000,
+      minPriceManual: 8000,
+    },
+    {
+      id: 2,
+      name: "Премиум",
+      base: 5000,
+      seasonTicketPrice: 120000,
+      minPriceManual: 4000,
+    },
+    {
+      id: 3,
+      name: "Стандарт",
+      base: 2500,
+      seasonTicketPrice: 60000,
+      minPriceManual: 2000,
+    },
+    {
+      id: 4,
+      name: "Эконом",
+      base: 900,
+      seasonTicketPrice: 24000,
+      minPriceManual: 800,
+    },
   ]);
 
   const [активнаяКатегорияId, setАктивнаяКатегорияId] = useState(2);
@@ -120,7 +145,10 @@ export default function Home() {
     категорииЦен[0];
 
   const минимальнаяЦенаАктивнойКатегории = Math.max(
-    Math.round(активнаяКатегория.seasonTicketPrice / Math.max(1, матчейВДомашнемСезоне)),
+    Math.round(
+      активнаяКатегория.seasonTicketPrice /
+        Math.max(1, матчейВДомашнемСезоне)
+    ),
     активнаяКатегория.minPriceManual
   );
 
@@ -140,7 +168,10 @@ export default function Home() {
     добавить("День недели", выходнойДень ? 1.1 : 0.95);
     добавить("Время матча", удобноеВремя ? 1.05 : 0.95);
 
-    if (лига === "КХЛ" && естьЗвезда) добавить("Звезда в составе", 1.1);
+    if (лига === "КХЛ" && естьЗвезда) {
+      добавить("Звезда в составе соперника", 1.1);
+    }
+
     if (дерби) добавить("Дерби / принципиальный матч", 1.15);
 
     if (местоКоманды <= 3) добавить("Высокое место клуба", 1.12);
@@ -163,7 +194,11 @@ export default function Home() {
     if (днейДоМатча < 2) добавить("Менее 2 дней до матча", 1.15);
 
     const рассчитаннаяЦена = Math.round(цена);
-    const итоговаяЦена = Math.max(рассчитаннаяЦена, минимальнаяЦенаАктивнойКатегории);
+
+    const итоговаяЦена = Math.max(
+      рассчитаннаяЦена,
+      минимальнаяЦенаАктивнойКатегории
+    );
 
     const количествоБилетов = 500;
     const базоваяВыручка = активнаяКатегория.base * количествоБилетов;
@@ -172,6 +207,7 @@ export default function Home() {
 
     const график = Array.from({ length: 8 }, (_, i) => {
       const спрос = Math.min(100, 15 + i * 10 + продано / 5);
+
       const ценаГрафика = Math.max(
         минимальнаяЦенаАктивнойКатегории,
         Math.round(
@@ -180,7 +216,11 @@ export default function Home() {
             (категорияМатча === 1 ? 1.45 : категорияМатча === 2 ? 1.2 : 1)
         )
       );
-      return { спрос, price: ценаГрафика };
+
+      return {
+        спрос,
+        price: ценаГрафика,
+      };
     });
 
     let рекомендация = "Сохранять текущую цену";
@@ -189,7 +229,8 @@ export default function Home() {
 
     if (рассчитаннаяЦена < минимальнаяЦенаАктивнойКатегории) {
       рекомендация = "Не снижать цену ниже минимального порога";
-      причина = "Расчётная цена ниже экономики абонемента или ручного лимита";
+      причина =
+        "Расчётная цена ниже экономики абонемента или ручного лимита клуба";
       действие = "Использовать минимально допустимую цену";
     } else if (продано > 75 && днейДоМатча < 7) {
       рекомендация = "Повысить цену на 12–18%";
@@ -198,7 +239,7 @@ export default function Home() {
     } else if (продано < 30 && днейДоМатча < 5) {
       рекомендация = "Снизить цену на 8–12%";
       причина = "Низкий спрос при близкой дате матча";
-      действие = "Стимулировать продажи в доступных категориях";
+      действие = "Стимулировать продажи, но не ниже минимальной цены";
     } else if (продано > 50) {
       рекомендация = "Повысить цену на 5–10%";
       причина = "Спрос выше среднего";
@@ -247,7 +288,10 @@ export default function Home() {
   ]);
 
   const maxPrice = Math.max(...результат.график.map((g) => g.price), 1);
-  const проданоБилетовВсего = Math.round(выбранныйКлуб.capacity * (продано / 100));
+
+  const проданоБилетовВсего = Math.round(
+    выбранныйКлуб.capacity * (продано / 100)
+  );
 
   const категорииСПродажами = категорииЦен.map((item, index) => {
     const доля =
@@ -260,20 +304,29 @@ export default function Home() {
         : 0.25 / Math.max(1, категорииЦен.length - 3);
 
     const местВКатегории = Math.round(выбранныйКлуб.capacity * доля);
-    const проданоВКатегории = Math.round(местВКатегории * (продано / 100));
-    const minPrice = Math.max(
-      Math.round(item.seasonTicketPrice / Math.max(1, матчейВДомашнемСезоне)),
+
+    const проданоВКатегории = Math.round(
+      местВКатегории * (продано / 100)
+    );
+
+    const минимальнаяЦена = Math.max(
+      Math.round(
+        item.seasonTicketPrice / Math.max(1, матчейВДомашнемСезоне)
+      ),
       item.minPriceManual
     );
 
     const динамическаяЦена =
       item.id === активнаяКатегорияId
         ? результат.итоговаяЦена
-        : Math.max(minPrice, Math.round(item.base * (1 + результат.ростПроцентов / 100)));
+        : Math.max(
+            минимальнаяЦена,
+            Math.round(item.base * (1 + результат.ростПроцентов / 100))
+          );
 
     return {
       ...item,
-      minPrice,
+      минимальнаяЦена,
       местВКатегории,
       проданоВКатегории,
       динамическаяЦена,
@@ -284,6 +337,7 @@ export default function Home() {
 
   const добавитьКатегорию = () => {
     const новыйId = Date.now();
+
     setКатегорииЦен([
       ...категорииЦен,
       {
@@ -294,12 +348,14 @@ export default function Home() {
         minPriceManual: 800,
       },
     ]);
+
     setАктивнаяКатегорияId(новыйId);
   };
 
   const удалитьКатегорию = (id: number) => {
     const новыйСписок = категорииЦен.filter((item) => item.id !== id);
     setКатегорииЦен(новыйСписок);
+
     if (активнаяКатегорияId === id && новыйСписок.length > 0) {
       setАктивнаяКатегорияId(новыйСписок[0].id);
     }
@@ -327,6 +383,7 @@ export default function Home() {
       <section style={styles.hero}>
         <div>
           <h1 style={styles.title}>Универсальная система управления ценами</h1>
+
           <p style={styles.subtitle}>
             Клуб выбирает лигу, настраивает свои билетные категории, задаёт
             базовые цены, а алгоритм рассчитывает рекомендованную цену и прогноз
@@ -336,19 +393,39 @@ export default function Home() {
 
         <div style={styles.priceCard}>
           <span style={styles.cardLabel}>Рекомендованная цена</span>
-          <h2 style={styles.price}>{результат.итоговаяЦена.toLocaleString()} ₽</h2>
-          <p style={styles.whiteText}>+{результат.ростПроцентов}% к базовой цене</p>
+
+          <h2 style={styles.price}>
+            {результат.итоговаяЦена.toLocaleString()} ₽
+          </h2>
+
+          <p style={styles.whiteText}>
+            +{результат.ростПроцентов}% к базовой цене
+          </p>
+
+          <div style={styles.priceSubRow}>
+            <span>Минимальный порог</span>
+            <b>{минимальнаяЦенаАктивнойКатегории.toLocaleString()} ₽</b>
+          </div>
         </div>
       </section>
 
       <section style={styles.kpiGrid}>
         <Kpi title="Арена" value={выбранныйКлуб.arena} />
-        <Kpi title="Динамическая выручка" value={`${результат.динамическаяВыручка.toLocaleString()} ₽`} />
+
+        <Kpi
+          title="Динамическая выручка"
+          value={`${результат.динамическаяВыручка.toLocaleString()} ₽`}
+        />
+
         <Kpi
           title="Продано билетов"
           value={`${проданоБилетовВсего.toLocaleString()} из ${выбранныйКлуб.capacity.toLocaleString()}`}
         />
-        <Kpi title="Минимальная цена" value={`${минимальнаяЦенаАктивнойКатегории.toLocaleString()} ₽`} />
+
+        <Kpi
+          title="Минимальная цена"
+          value={`${минимальнаяЦенаАктивнойКатегории.toLocaleString()} ₽`}
+        />
       </section>
 
       <section style={styles.grid}>
@@ -356,6 +433,7 @@ export default function Home() {
           <h3>Клуб и матч</h3>
 
           <Label text="Лига" />
+
           <select
             style={styles.select}
             value={лига}
@@ -366,24 +444,36 @@ export default function Home() {
             }}
           >
             {Object.keys(клубыПоЛигам).map((item) => (
-              <option key={item} value={item}>{item}</option>
+              <option key={item} value={item}>
+                {item}
+              </option>
             ))}
           </select>
 
           <Label text="Клуб" />
-          <select style={styles.select} value={клуб} onChange={(e) => setКлуб(e.target.value)}>
+
+          <select
+            style={styles.select}
+            value={клуб}
+            onChange={(e) => setКлуб(e.target.value)}
+          >
             {клубыПоЛигам[лига].map((item) => (
-              <option key={item.name} value={item.name}>{item.name}</option>
+              <option key={item.name} value={item.name}>
+                {item.name}
+              </option>
             ))}
           </select>
 
           <div style={styles.arenaInfo}>
             <span>Домашняя арена</span>
             <b>{выбранныйКлуб.arena}</b>
-            <small>Вместимость: {выбранныйКлуб.capacity.toLocaleString()} мест</small>
+            <small>
+              Вместимость: {выбранныйКлуб.capacity.toLocaleString()} мест
+            </small>
           </div>
 
           <Label text="Активная ценовая категория" />
+
           <select
             style={styles.select}
             value={активнаяКатегорияId}
@@ -397,6 +487,7 @@ export default function Home() {
           </select>
 
           <Label text="Категория матча" />
+
           <select
             style={styles.select}
             value={категорияМатча}
@@ -407,68 +498,191 @@ export default function Home() {
             <option value={3}>Базовый матч / низкий спрос</option>
           </select>
 
-          <Slider label="Продано билетов" value={продано} max={100} suffix="%" setValue={setПродано} />
-          <Slider label="Дней до матча" value={днейДоМатча} max={60} setValue={setДнейДоМатча} />
-          <Slider label="Место команды" value={местоКоманды} min={1} max={12} setValue={setМестоКоманды} />
-          <Slider label="Место соперника" value={местоСоперника} min={1} max={12} setValue={setМестоСоперника} />
-          <Slider label="Победная серия" value={победнаяСерия} max={5} setValue={setПобеднаяСерия} />
+          <Slider
+            label="Продано билетов"
+            value={продано}
+            max={100}
+            suffix="%"
+            setValue={setПродано}
+          />
+
+          <Slider
+            label="Дней до матча"
+            value={днейДоМатча}
+            max={60}
+            setValue={setДнейДоМатча}
+          />
+
+          <Slider
+            label="Место команды"
+            value={местоКоманды}
+            min={1}
+            max={12}
+            setValue={setМестоКоманды}
+          />
+
+          <Slider
+            label="Место соперника"
+            value={местоСоперника}
+            min={1}
+            max={12}
+            setValue={setМестоСоперника}
+          />
+
+          <Slider
+            label="Победная серия"
+            value={победнаяСерия}
+            max={5}
+            setValue={setПобеднаяСерия}
+          />
         </div>
 
         <div style={styles.panel}>
-          <h3>Редактор ценовых категорий</h3>
-          <p style={styles.hint}>
-            Для каждой категории можно вручную задать базовую цену, стоимость
-            абонемента и нижний ценовой порог.
-          </p>
+          <div style={styles.sectionHeader}>
+            <div>
+              <h3>Управление билетными категориями</h3>
+              <p style={styles.hint}>
+                Клуб задаёт базовую цену билета, стоимость абонемента и
+                минимально допустимую цену для каждой категории мест.
+              </p>
+            </div>
+          </div>
 
-          <Label text="Количество домашних матчей в сезоне" />
+          <div style={styles.explainBox}>
+            <b>Как рассчитывается минимальная цена</b>
+            <p>
+              Минимальная цена = стоимость абонемента / количество домашних
+              матчей. Если клуб задаёт ручной нижний порог выше этой суммы,
+              система использует ручной порог.
+            </p>
+          </div>
+
+          <Label text="Домашних матчей в сезоне" />
+
           <input
             style={styles.input}
             type="number"
             value={матчейВДомашнемСезоне}
-            onChange={(e) => setМатчейВДомашнемСезоне(Number(e.target.value) || 1)}
+            onChange={(e) =>
+              setМатчейВДомашнемСезоне(Number(e.target.value) || 1)
+            }
           />
 
           <div style={styles.minPriceBox}>
-            <span>Минимальная цена активной категории</span>
+            <span>Минимально допустимая цена продажи билета</span>
             <b>{минимальнаяЦенаАктивнойКатегории.toLocaleString()} ₽</b>
           </div>
 
+          <div style={styles.categoryHeader}>
+            <span>Категория мест</span>
+            <span>Базовая цена</span>
+            <span>Абонемент</span>
+            <span>Нижний порог</span>
+            <span></span>
+          </div>
+
           <div style={styles.categoryList}>
-            {категорииЦен.map((item) => (
-              <div key={item.id} style={styles.categoryRowWide}>
-                <input
-                  style={styles.input}
-                  value={item.name}
-                  onChange={(e) => обновитьКатегорию(item.id, "name", e.target.value)}
-                />
-                <input
-                  style={styles.inputPrice}
-                  type="number"
-                  value={item.base}
-                  onChange={(e) => обновитьКатегорию(item.id, "base", e.target.value)}
-                />
-                <input
-                  style={styles.inputPrice}
-                  type="number"
-                  value={item.seasonTicketPrice}
-                  onChange={(e) => обновитьКатегорию(item.id, "seasonTicketPrice", e.target.value)}
-                />
-                <input
-                  style={styles.inputPrice}
-                  type="number"
-                  value={item.minPriceManual}
-                  onChange={(e) => обновитьКатегорию(item.id, "minPriceManual", e.target.value)}
-                />
-                <button
-                  style={styles.deleteButton}
-                  onClick={() => удалитьКатегорию(item.id)}
-                  disabled={категорииЦен.length === 1}
-                >
-                  Удалить
-                </button>
-              </div>
-            ))}
+            {категорииЦен.map((item) => {
+              const автоМинимум = Math.round(
+                item.seasonTicketPrice / Math.max(1, матчейВДомашнемСезоне)
+              );
+
+              const итоговыйМинимум = Math.max(
+                автоМинимум,
+                item.minPriceManual
+              );
+
+              return (
+                <div key={item.id} style={styles.categoryCard}>
+                  <div>
+                    <input
+                      style={styles.input}
+                      value={item.name}
+                      onChange={(e) =>
+                        обновитьКатегорию(item.id, "name", e.target.value)
+                      }
+                    />
+
+                    <small style={styles.cellHint}>
+                      Название сектора или типа мест
+                    </small>
+                  </div>
+
+                  <div>
+                    <div style={styles.priceInputWrap}>
+                      <input
+                        style={styles.inputPrice}
+                        type="number"
+                        value={item.base}
+                        onChange={(e) =>
+                          обновитьКатегорию(item.id, "base", e.target.value)
+                        }
+                      />
+                      <span>₽</span>
+                    </div>
+
+                    <small style={styles.cellHint}>Обычная цена билета</small>
+                  </div>
+
+                  <div>
+                    <div style={styles.priceInputWrap}>
+                      <input
+                        style={styles.inputPrice}
+                        type="number"
+                        value={item.seasonTicketPrice}
+                        onChange={(e) =>
+                          обновитьКатегорию(
+                            item.id,
+                            "seasonTicketPrice",
+                            e.target.value
+                          )
+                        }
+                      />
+                      <span>₽</span>
+                    </div>
+
+                    <small style={styles.cellHint}>Цена сезонного абонемента</small>
+                  </div>
+
+                  <div>
+                    <div style={styles.priceInputWrap}>
+                      <input
+                        style={styles.inputPrice}
+                        type="number"
+                        value={item.minPriceManual}
+                        onChange={(e) =>
+                          обновитьКатегорию(
+                            item.id,
+                            "minPriceManual",
+                            e.target.value
+                          )
+                        }
+                      />
+                      <span>₽</span>
+                    </div>
+
+                    <small style={styles.cellHint}>
+                      Ручной минимум клуба
+                    </small>
+                  </div>
+
+                  <button
+                    style={styles.deleteButton}
+                    onClick={() => удалитьКатегорию(item.id)}
+                    disabled={категорииЦен.length === 1}
+                  >
+                    Удалить
+                  </button>
+
+                  <div style={styles.minFormula}>
+                    <span>
+                      Абонемент / матчи: {автоМинимум.toLocaleString()} ₽
+                    </span>
+                    <b>Итоговый минимум: {итоговыйМинимум.toLocaleString()} ₽</b>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <button style={styles.addButton} onClick={добавитьКатегорию}>
@@ -477,13 +691,21 @@ export default function Home() {
 
           <div style={{ marginTop: 28 }}>
             <h3>Продажи по категориям</h3>
+
             <div style={styles.salesTable}>
               {категорииСПродажами.map((item) => (
                 <div key={item.id} style={styles.salesRow}>
                   <b>{item.name}</b>
-                  <span>{item.проданоВКатегории.toLocaleString()} / {item.местВКатегории.toLocaleString()} билетов</span>
-                  <span>Мин: {item.minPrice.toLocaleString()} ₽</span>
+
+                  <span>
+                    {item.проданоВКатегории.toLocaleString()} /{" "}
+                    {item.местВКатегории.toLocaleString()} билетов
+                  </span>
+
+                  <span>Мин: {item.минимальнаяЦена.toLocaleString()} ₽</span>
+
                   <span>ДЦО: {item.динамическаяЦена.toLocaleString()} ₽</span>
+
                   <strong>{item.динамическаяВыручка.toLocaleString()} ₽</strong>
                 </div>
               ))}
@@ -495,32 +717,68 @@ export default function Home() {
       <section style={styles.grid}>
         <div style={styles.panel}>
           <h3>Прогноз роста цены</h3>
+
           <div style={styles.chart}>
             {результат.график.map((point, i) => (
               <div key={i} style={styles.barWrap}>
-                <div style={{ ...styles.bar, height: `${(point.price / maxPrice) * 190}px` }} />
-                <span style={styles.barLabel}>{point.price.toLocaleString()} ₽</span>
+                <div
+                  style={{
+                    ...styles.bar,
+                    height: `${(point.price / maxPrice) * 190}px`,
+                  }}
+                />
+
+                <span style={styles.barLabel}>
+                  {point.price.toLocaleString()} ₽
+                </span>
               </div>
             ))}
           </div>
+
           <p style={styles.hint}>
-            График показывает прогноз роста цены при изменении спроса с учётом минимальной допустимой цены.
+            График показывает прогноз роста цены при изменении спроса с учётом
+            минимально допустимой цены.
           </p>
         </div>
 
         <div style={styles.panel}>
           <h3>AI Pricing Engine</h3>
+
           <div style={styles.aiEngine}>
-            <InfoRow title="Текущий спрос" value={продано > 60 ? "Высокий" : продано > 35 ? "Средний" : "Низкий"} />
-            <InfoRow title="Confidence score" value={`${результат.confidence}%`} />
-            <InfoRow title="Прогноз sold out" value={`${результат.вероятностьSoldOut}%`} />
-            <InfoRow title="Revenue uplift" value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`} />
+            <InfoRow
+              title="Текущий спрос"
+              value={
+                продано > 60 ? "Высокий" : продано > 35 ? "Средний" : "Низкий"
+              }
+            />
+
+            <InfoRow
+              title="Confidence score"
+              value={`${результат.confidence}%`}
+            />
+
+            <InfoRow
+              title="Прогноз sold out"
+              value={`${результат.вероятностьSoldOut}%`}
+            />
+
+            <InfoRow
+              title="Revenue uplift"
+              value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`}
+            />
 
             <div style={styles.aiRecommendation}>
               <span style={styles.cardLabel}>Рекомендация системы</span>
+
               <h2>{результат.рекомендация}</h2>
-              <p><b>Причина:</b> {результат.причина}</p>
-              <p><b>Действие:</b> {результат.действие}</p>
+
+              <p>
+                <b>Причина:</b> {результат.причина}
+              </p>
+
+              <p>
+                <b>Действие:</b> {результат.действие}
+              </p>
             </div>
           </div>
         </div>
@@ -529,18 +787,37 @@ export default function Home() {
       <section style={styles.grid}>
         <div style={styles.panel}>
           <h3>Факторы спроса</h3>
-          <Check text="Выходной день" checked={выходнойДень} setChecked={setВыходнойДень} />
-          <Check text="Удобное время" checked={удобноеВремя} setChecked={setУдобноеВремя} />
+
+          <Check
+            text="Выходной день"
+            checked={выходнойДень}
+            setChecked={setВыходнойДень}
+          />
+
+          <Check
+            text="Удобное время"
+            checked={удобноеВремя}
+            setChecked={setУдобноеВремя}
+          />
 
           {лига === "КХЛ" && (
-            <Check text="Есть звезда у соперника" checked={естьЗвезда} setChecked={setЕстьЗвезда} />
+            <Check
+              text="Есть звезда у соперника"
+              checked={естьЗвезда}
+              setChecked={setЕстьЗвезда}
+            />
           )}
 
-          <Check text="Дерби / принципиальный матч" checked={дерби} setChecked={setДерби} />
+          <Check
+            text="Дерби / принципиальный матч"
+            checked={дерби}
+            setChecked={setДерби}
+          />
         </div>
 
         <div style={styles.panel}>
           <h3>Применённые коэффициенты</h3>
+
           {результат.коэффициенты.map((f, i) => (
             <div key={i} style={styles.factor}>
               <span>{f.name}</span>
@@ -566,13 +843,25 @@ function Label({ text }: any) {
   return <p style={styles.label}>{text}</p>;
 }
 
-function Slider({ label, value, setValue, min = 0, max, suffix = "" }: any) {
+function Slider({
+  label,
+  value,
+  setValue,
+  min = 0,
+  max,
+  suffix = "",
+}: any) {
   return (
     <div style={{ marginTop: 18 }}>
       <div style={styles.sliderTop}>
         <span>{label}</span>
-        <b>{value}{suffix}</b>
+
+        <b>
+          {value}
+          {suffix}
+        </b>
       </div>
+
       <input
         style={styles.range}
         type="range"
@@ -588,7 +877,12 @@ function Slider({ label, value, setValue, min = 0, max, suffix = "" }: any) {
 function Check({ text, checked, setChecked }: any) {
   return (
     <label style={styles.check}>
-      <input type="checkbox" checked={checked} onChange={() => setChecked(!checked)} /> {text}
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={() => setChecked(!checked)}
+      />{" "}
+      {text}
     </label>
   );
 }
@@ -610,75 +904,105 @@ const styles: any = {
     padding: 36,
     fontFamily: "Inter, Arial, sans-serif",
   },
+
   hero: {
     display: "grid",
     gridTemplateColumns: "1.5fr 1fr",
     gap: 24,
     marginBottom: 24,
   },
+
   title: {
     fontSize: 54,
     lineHeight: 1,
     margin: 0,
     letterSpacing: "-2px",
   },
+
   subtitle: {
     maxWidth: 760,
     color: "#bdbdbd",
     fontSize: 18,
     lineHeight: 1.5,
   },
+
   priceCard: {
     background: "#111111",
     border: "1px solid #2a2a2a",
     borderRadius: 28,
     padding: 28,
   },
+
   cardLabel: {
     color: "#9b9b9b",
     fontSize: 14,
   },
+
   price: {
     fontSize: 52,
     margin: "14px 0 6px",
   },
+
   whiteText: {
     color: "#ffffff",
     margin: 0,
   },
+
+  priceSubRow: {
+    marginTop: 18,
+    paddingTop: 16,
+    borderTop: "1px solid #2a2a2a",
+    display: "flex",
+    justifyContent: "space-between",
+    color: "#d8d8d8",
+  },
+
   kpiGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     gap: 16,
     marginBottom: 24,
   },
+
   kpi: {
     background: "#111111",
     border: "1px solid #2a2a2a",
     borderRadius: 22,
     padding: 22,
   },
+
   kpiValue: {
     display: "block",
     fontSize: 22,
     marginTop: 10,
   },
+
   grid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: 24,
     marginBottom: 24,
   },
+
   panel: {
     background: "#111111",
     border: "1px solid #2a2a2a",
     borderRadius: 28,
     padding: 24,
   },
+
+  sectionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 16,
+    marginBottom: 16,
+  },
+
   label: {
     color: "#bdbdbd",
     marginBottom: 8,
   },
+
   select: {
     width: "100%",
     padding: 14,
@@ -688,6 +1012,7 @@ const styles: any = {
     color: "#ffffff",
     marginBottom: 16,
   },
+
   arenaInfo: {
     marginTop: 4,
     marginBottom: 18,
@@ -699,40 +1024,115 @@ const styles: any = {
     flexDirection: "column",
     gap: 6,
   },
+
   sliderTop: {
     display: "flex",
     justifyContent: "space-between",
   },
+
   range: {
     width: "100%",
     accentColor: "#ffffff",
   },
+
+  input: {
+    width: "100%",
+    padding: 12,
+    borderRadius: 12,
+    border: "1px solid #333333",
+    background: "#050505",
+    color: "#ffffff",
+    boxSizing: "border-box",
+  },
+
+  inputPrice: {
+    width: "100%",
+    padding: 12,
+    border: "none",
+    background: "transparent",
+    color: "#ffffff",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+
+  priceInputWrap: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    paddingRight: 10,
+    borderRadius: 12,
+    border: "1px solid #333333",
+    background: "#050505",
+  },
+
+  explainBox: {
+    padding: 18,
+    borderRadius: 18,
+    background: "#0a0a0a",
+    border: "1px solid #2a2a2a",
+    marginBottom: 18,
+    color: "#d8d8d8",
+  },
+
+  minPriceBox: {
+    marginTop: 18,
+    marginBottom: 18,
+    padding: 18,
+    borderRadius: 18,
+    background: "#0a0a0a",
+    border: "1px solid #ffffff",
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+
+  categoryHeader: {
+    display: "grid",
+    gridTemplateColumns: "1.3fr 1fr 1fr 1fr 90px",
+    gap: 10,
+    color: "#9b9b9b",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+
   categoryList: {
     display: "flex",
     flexDirection: "column",
     gap: 12,
-    marginTop: 18,
   },
-  categoryRowWide: {
+
+  categoryCard: {
     display: "grid",
-    gridTemplateColumns: "1fr 110px 130px 110px 90px",
+    gridTemplateColumns: "1.3fr 1fr 1fr 1fr 90px",
     gap: 10,
-    alignItems: "center",
+    alignItems: "start",
+    padding: 14,
+    borderRadius: 18,
+    background: "#0a0a0a",
+    border: "1px solid #2a2a2a",
   },
-  input: {
-    padding: 12,
-    borderRadius: 12,
-    border: "1px solid #333333",
-    background: "#050505",
-    color: "#ffffff",
+
+  cellHint: {
+    display: "block",
+    marginTop: 7,
+    color: "#777777",
+    fontSize: 11,
   },
-  inputPrice: {
-    padding: 12,
-    borderRadius: 12,
-    border: "1px solid #333333",
-    background: "#050505",
-    color: "#ffffff",
+
+  minFormula: {
+    gridColumn: "1 / -1",
+    display: "flex",
+    justifyContent: "space-between",
+    paddingTop: 12,
+    marginTop: 4,
+    borderTop: "1px solid #222222",
+    color: "#bdbdbd",
+    fontSize: 13,
   },
+
   addButton: {
     marginTop: 18,
     width: "100%",
@@ -744,6 +1144,7 @@ const styles: any = {
     fontWeight: 800,
     cursor: "pointer",
   },
+
   deleteButton: {
     padding: 12,
     borderRadius: 12,
@@ -752,22 +1153,14 @@ const styles: any = {
     color: "#ffffff",
     cursor: "pointer",
   },
-  minPriceBox: {
-    marginTop: 18,
-    padding: 18,
-    borderRadius: 18,
-    background: "#0a0a0a",
-    border: "1px solid #2a2a2a",
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 16,
-  },
+
   salesTable: {
     display: "flex",
     flexDirection: "column",
     gap: 10,
     marginTop: 14,
   },
+
   salesRow: {
     display: "grid",
     gridTemplateColumns: "1fr 1.4fr 1fr 1fr 1.2fr",
@@ -780,6 +1173,7 @@ const styles: any = {
     color: "#dddddd",
     fontSize: 13,
   },
+
   chart: {
     height: 260,
     display: "flex",
@@ -787,6 +1181,7 @@ const styles: any = {
     gap: 18,
     paddingTop: 30,
   },
+
   barWrap: {
     flex: 1,
     display: "flex",
@@ -794,25 +1189,30 @@ const styles: any = {
     alignItems: "center",
     justifyContent: "end",
   },
+
   bar: {
     width: "100%",
     borderRadius: "14px 14px 4px 4px",
     background: "#ffffff",
   },
+
   barLabel: {
     marginTop: 8,
     color: "#9b9b9b",
     fontSize: 12,
   },
+
   hint: {
     color: "#9b9b9b",
   },
+
   aiEngine: {
     marginTop: 20,
     display: "flex",
     flexDirection: "column",
     gap: 16,
   },
+
   aiRow: {
     display: "flex",
     justifyContent: "space-between",
@@ -822,6 +1222,7 @@ const styles: any = {
     border: "1px solid #2a2a2a",
     color: "#dddddd",
   },
+
   aiRecommendation: {
     marginTop: 10,
     padding: 24,
@@ -829,10 +1230,12 @@ const styles: any = {
     background: "#0a0a0a",
     border: "1px solid #ffffff",
   },
+
   check: {
     display: "block",
     marginBottom: 14,
   },
+
   factor: {
     display: "flex",
     justifyContent: "space-between",
