@@ -2,37 +2,10 @@
 
 import { useMemo, useState } from "react";
 
-const клубыПоЛигам: Record<string, string[]> = {
-  КХЛ: [
-    "Авангард", "Автомобилист", "Адмирал", "Ак Барс", "Амур", "Барыс",
-    "Витязь", "Динамо Москва", "Динамо Минск", "Куньлунь / Шанхайские Драконы",
-    "Лада", "Локомотив", "Металлург", "Нефтехимик", "Салават Юлаев",
-    "Северсталь", "Сибирь", "СКА", "Спартак", "Торпедо", "Трактор", "ЦСКА"
-  ],
-  ВХЛ: [
-    "АКМ", "Барс", "Буран", "Горняк-УГМК", "Дизель", "Динамо-Алтай",
-    "Динамо Санкт-Петербург", "Зауралье", "Звезда", "Ижсталь", "Кристалл",
-    "Магнитка", "Металлург Новокузнецк", "Молот", "Нефтяник", "Норильск",
-    "Олимпия", "Омские Крылья", "Ростов", "Рубин", "Рязань-ВДВ", "СКА-Нева",
-    "Сокол", "Тамбов", "Торос", "Торпедо-Горький", "Химик", "Челмет",
-    "Югра"
-  ],
-  МХЛ: [
-    "Авто", "Академия Михайлова", "Академия СКА", "Алмаз", "Амурские Тигры",
-    "Белые Медведи", "Динамо-Карелия", "Ирбис", "Капитан", "Красная Армия",
-    "Красная Машина-Юниор", "Крылья Советов", "Кузнецкие Медведи", "Ладья",
-    "Локо", "Локо-76", "Мамонты Югры", "МХК Динамо Москва", "МХК Динамо СПб",
-    "МХК Динамо-Шинник", "МХК Молот", "МХК Спартак", "МХК Спартак МАХ",
-    "Омские Ястребы", "Реактор", "Сахалинские Акулы", "СКА-1946",
-    "Снежные Барсы", "Спутник", "Стальные Лисы", "Тайфун", "Толпар",
-    "Тюменский Легион", "Чайка"
-  ],
-  НМХЛ: [
-    "Арктика", "Буран Москва", "Воевода", "Гранит-Чехов", "Динамо-576",
-    "Ленинградец", "Металлург ВО", "МХК Ермак", "МХК Калуга",
-    "МХК Кристалл С", "МХК Рязань-ВДВ", "Полет Рыбинск", "Протон",
-    "ЭкоНива-Бобров", "Юниор"
-  ],
+type Клуб = {
+  name: string;
+  arena: string;
+  capacity: number;
 };
 
 type КатегорияЦены = {
@@ -41,9 +14,125 @@ type КатегорияЦены = {
   base: number;
 };
 
+const клубыПоЛигам: Record<string, Клуб[]> = {
+  КХЛ: [
+    { name: "Авангард", arena: "G-Drive Арена", capacity: 12011 },
+    { name: "Автомобилист", arena: "УГМК Арена", capacity: 12000 },
+    { name: "Адмирал", arena: "Фетисов Арена", capacity: 7500 },
+    { name: "Ак Барс", arena: "Татнефть Арена", capacity: 8890 },
+    { name: "Амур", arena: "Платинум Арена", capacity: 7100 },
+    { name: "Барыс", arena: "Барыс Арена", capacity: 11578 },
+    { name: "Динамо Москва", arena: "ВТБ Арена", capacity: 11478 },
+    { name: "Динамо Минск", arena: "Минск-Арена", capacity: 15086 },
+    { name: "Шанхайские Драконы", arena: "СКА Арена", capacity: 22500 },
+    { name: "Лада", arena: "Лада-Арена", capacity: 6000 },
+    { name: "Локомотив", arena: "Арена 2000", capacity: 9070 },
+    { name: "Металлург", arena: "Арена Металлург", capacity: 7704 },
+    { name: "Нефтехимик", arena: "Нефтехим Арена", capacity: 5500 },
+    { name: "Салават Юлаев", arena: "Уфа-Арена", capacity: 8070 },
+    { name: "Северсталь", arena: "Ледовый дворец Череповец", capacity: 6064 },
+    { name: "Сибирь", arena: "Сибирь-Арена", capacity: 10500 },
+    { name: "СКА", arena: "Ледовый дворец Санкт-Петербург", capacity: 12300 },
+    { name: "Спартак", arena: "Мегаспорт", capacity: 11748 },
+    { name: "Торпедо", arena: "КРК Нагорный", capacity: 5500 },
+    { name: "Трактор", arena: "Арена Трактор", capacity: 7500 },
+    { name: "ЦСКА", arena: "ЦСКА Арена", capacity: 12100 },
+  ],
+
+  ВХЛ: [
+    { name: "АКМ", arena: "Ледовый дворец Тулы", capacity: 3000 },
+    { name: "Барс", arena: "Дворец спорта", capacity: 3500 },
+    { name: "Буран", arena: "ДС Юбилейный", capacity: 3040 },
+    { name: "Горняк-УГМК", arena: "Ледовая арена им. Козицына", capacity: 1500 },
+    { name: "Дизель", arena: "Дизель-Арена", capacity: 5500 },
+    { name: "Динамо-Алтай", arena: "Титов Арена", capacity: 4500 },
+    { name: "Динамо Санкт-Петербург", arena: "СК Юбилейный", capacity: 7000 },
+    { name: "Зауралье", arena: "Ледовый дворец им. Парышева", capacity: 2500 },
+    { name: "Звезда", arena: "ЦСКА Арена", capacity: 12100 },
+    { name: "Ижсталь", arena: "Ледовый дворец Ижсталь", capacity: 3900 },
+    { name: "Кристалл", arena: "ДС Кристалл", capacity: 5000 },
+    { name: "Магнитка", arena: "Арена Металлург", capacity: 7704 },
+    { name: "Металлург Новокузнецк", arena: "Арена Кузнецких Металлургов", capacity: 7533 },
+    { name: "Молот", arena: "УДС Молот", capacity: 7000 },
+    { name: "Нефтяник", arena: "ДС Юбилейный Альметьевск", capacity: 2200 },
+    { name: "Норильск", arena: "Арена Норильск", capacity: 2000 },
+    { name: "Олимпия", arena: "ДС Олимпия", capacity: 2500 },
+    { name: "Омские Крылья", arena: "G-Drive Арена", capacity: 12011 },
+    { name: "Ростов", arena: "Дворец спорта Ростов-на-Дону", capacity: 4000 },
+    { name: "Рубин", arena: "Дворец спорта Тюмень", capacity: 3346 },
+    { name: "Рязань-ВДВ", arena: "ДС Олимпийский", capacity: 2700 },
+    { name: "СКА-Нева", arena: "СК Юбилейный", capacity: 7000 },
+    { name: "Сокол", arena: "Платинум Арена Красноярск", capacity: 7000 },
+    { name: "Тамбов", arena: "ЛДС Кристалл Тамбов", capacity: 3500 },
+    { name: "Торос", arena: "Ледовый дворец Нефтекамск", capacity: 2000 },
+    { name: "Торпедо-Горький", arena: "КРК Нагорный", capacity: 5500 },
+    { name: "Химик", arena: "ЛДС Подмосковье", capacity: 4500 },
+    { name: "Челмет", arena: "ДС Юность", capacity: 3650 },
+    { name: "Югра", arena: "Арена Югра", capacity: 5500 },
+  ],
+
+  МХЛ: [
+    { name: "Авто", arena: "КРК Уралец / УГМК Арена", capacity: 5000 },
+    { name: "Академия Михайлова", arena: "Ледовый дворец Тулы", capacity: 3000 },
+    { name: "Академия СКА", arena: "Хоккейный город", capacity: 1500 },
+    { name: "Алмаз", arena: "Ледовый дворец Череповец", capacity: 6064 },
+    { name: "Амурские Тигры", arena: "Платинум Арена", capacity: 7100 },
+    { name: "Белые Медведи", arena: "ДС Юность", capacity: 3650 },
+    { name: "Динамо-Карелия", arena: "Луми", capacity: 1450 },
+    { name: "Ирбис", arena: "Татнефть Арена", capacity: 8890 },
+    { name: "Капитан", arena: "ЛД Витязь", capacity: 5500 },
+    { name: "Красная Армия", arena: "ЦСКА Арена", capacity: 12100 },
+    { name: "Красная Машина-Юниор", arena: "Красная Машина Арена", capacity: 1000 },
+    { name: "Крылья Советов", arena: "Арена Крылья Советов", capacity: 5500 },
+    { name: "Кузнецкие Медведи", arena: "Арена Кузнецких Металлургов", capacity: 7533 },
+    { name: "Ладья", arena: "Лада-Арена", capacity: 6000 },
+    { name: "Локо", arena: "Арена 2000", capacity: 9070 },
+    { name: "Локо-76", arena: "Арена 2000", capacity: 9070 },
+    { name: "Мамонты Югры", arena: "Арена Югра", capacity: 5500 },
+    { name: "МХК Динамо Москва", arena: "ВТБ Арена", capacity: 11478 },
+    { name: "МХК Динамо СПб", arena: "СК Юбилейный", capacity: 7000 },
+    { name: "МХК Динамо-Шинник", arena: "Бобруйск-Арена", capacity: 7000 },
+    { name: "МХК Молот", arena: "УДС Молот", capacity: 7000 },
+    { name: "МХК Спартак", arena: "Мегаспорт / МСА", capacity: 11748 },
+    { name: "Омские Ястребы", arena: "G-Drive Арена", capacity: 12011 },
+    { name: "Реактор", arena: "Нефтехим Арена", capacity: 5500 },
+    { name: "Сахалинские Акулы", arena: "Арена Сити", capacity: 1500 },
+    { name: "СКА-1946", arena: "СК Юбилейный", capacity: 7000 },
+    { name: "Снежные Барсы", arena: "Барыс Арена", capacity: 11578 },
+    { name: "Спутник", arena: "Ледовый дворец Нижний Тагил", capacity: 4200 },
+    { name: "Стальные Лисы", arena: "Арена Металлург", capacity: 7704 },
+    { name: "Тайфун", arena: "Фетисов Арена", capacity: 7500 },
+    { name: "Толпар", arena: "Уфа-Арена", capacity: 8070 },
+    { name: "Тюменский Легион", arena: "Дворец спорта Тюмень", capacity: 3346 },
+    { name: "Чайка", arena: "КРК Нагорный", capacity: 5500 },
+  ],
+
+  НМХЛ: [
+    { name: "Арктика", arena: "Ледовый дворец Арктика", capacity: 1000 },
+    { name: "Буран Москва", arena: "Арена Морозово", capacity: 500 },
+    { name: "Воевода", arena: "Ледовый дворец", capacity: 1000 },
+    { name: "Гранит-Чехов", arena: "ЛХЦ Витязь", capacity: 3300 },
+    { name: "Динамо-576", arena: "СК Юбилейный", capacity: 7000 },
+    { name: "Ленинградец", arena: "Ледовая арена", capacity: 1000 },
+    { name: "Металлург ВО", arena: "Ледовая арена", capacity: 1000 },
+    { name: "МХК Ермак", arena: "Ермак", capacity: 6900 },
+    { name: "МХК Калуга", arena: "ДС Центральный", capacity: 2000 },
+    { name: "МХК Кристалл С", arena: "ДС Кристалл", capacity: 5000 },
+    { name: "МХК Рязань-ВДВ", arena: "ДС Олимпийский", capacity: 2700 },
+    { name: "Полет Рыбинск", arena: "ДС Полет", capacity: 2000 },
+    { name: "Протон", arena: "Ледовый дворец", capacity: 1500 },
+    { name: "ЭкоНива-Бобров", arena: "Ледовый дворец им. Фетисова", capacity: 2000 },
+    { name: "Юниор", arena: "Ледовый дворец", capacity: 1000 },
+  ],
+};
+
 export default function Home() {
   const [лига, setЛига] = useState("КХЛ");
-  const [клуб, setКлуб] = useState(клубыПоЛигам["КХЛ"][0]);
+  const [клуб, setКлуб] = useState(клубыПоЛигам["КХЛ"][0].name);
+
+  const выбранныйКлуб =
+    клубыПоЛигам[лига].find((item) => item.name === клуб) ||
+    клубыПоЛигам[лига][0];
 
   const [категорииЦен, setКатегорииЦен] = useState<КатегорияЦены[]>([
     { id: 1, name: "VIP", base: 12000 },
@@ -180,6 +269,38 @@ export default function Home() {
 
   const maxPrice = Math.max(...результат.график.map((g) => g.price), 1);
 
+  const проданоБилетовВсего = Math.round(
+    выбранныйКлуб.capacity * (продано / 100)
+  );
+
+  const категорииСПродажами = категорииЦен.map((item, index) => {
+    const доля =
+      index === 0
+        ? 0.08
+        : index === 1
+        ? 0.22
+        : index === 2
+        ? 0.45
+        : 0.25 / Math.max(1, категорииЦен.length - 3);
+
+    const местВКатегории = Math.round(выбранныйКлуб.capacity * доля);
+    const проданоВКатегории = Math.round(местВКатегории * (продано / 100));
+
+    const динамическаяЦена =
+      item.id === активнаяКатегорияId
+        ? результат.итоговаяЦена
+        : Math.round(item.base * (1 + результат.ростПроцентов / 100));
+
+    return {
+      ...item,
+      местВКатегории,
+      проданоВКатегории,
+      динамическаяЦена,
+      базоваяВыручка: проданоВКатегории * item.base,
+      динамическаяВыручка: проданоВКатегории * динамическаяЦена,
+    };
+  });
+
   const добавитьКатегорию = () => {
     const новыйId = Date.now();
     setКатегорииЦен([
@@ -239,15 +360,14 @@ export default function Home() {
       </section>
 
       <section style={styles.kpiGrid}>
-        <Kpi title="Клуб" value={клуб} />
+        <Kpi title="Арена" value={выбранныйКлуб.arena} />
         <Kpi
           title="Динамическая выручка"
           value={`${результат.динамическаяВыручка.toLocaleString()} ₽`}
         />
         <Kpi
-          title="Дополнительная выручка"
-          value={`${результат.дополнительнаяВыручка.toLocaleString()} ₽`}
-          highlight
+          title="Продано билетов"
+          value={`${проданоБилетовВсего.toLocaleString()} из ${выбранныйКлуб.capacity.toLocaleString()}`}
         />
         <Kpi title="Вероятность sold out" value={`${результат.вероятностьSoldOut}%`} />
       </section>
@@ -263,7 +383,7 @@ export default function Home() {
             onChange={(e) => {
               const новаяЛига = e.target.value;
               setЛига(новаяЛига);
-              setКлуб(клубыПоЛигам[новаяЛига][0]);
+              setКлуб(клубыПоЛигам[новаяЛига][0].name);
             }}
           >
             {Object.keys(клубыПоЛигам).map((item) => (
@@ -280,11 +400,17 @@ export default function Home() {
             onChange={(e) => setКлуб(e.target.value)}
           >
             {клубыПоЛигам[лига].map((item) => (
-              <option key={item} value={item}>
-                {item}
+              <option key={item.name} value={item.name}>
+                {item.name}
               </option>
             ))}
           </select>
+
+          <div style={styles.arenaInfo}>
+            <span>Домашняя арена</span>
+            <b>{выбранныйКлуб.arena}</b>
+            <small>Вместимость: {выбранныйКлуб.capacity.toLocaleString()} мест</small>
+          </div>
 
           <Label text="Активная ценовая категория" />
           <select
@@ -355,6 +481,25 @@ export default function Home() {
           <button style={styles.addButton} onClick={добавитьКатегорию}>
             + Добавить категорию
           </button>
+
+          <div style={{ marginTop: 28 }}>
+            <h3>Продажи по категориям</h3>
+
+            <div style={styles.salesTable}>
+              {категорииСПродажами.map((item) => (
+                <div key={item.id} style={styles.salesRow}>
+                  <b>{item.name}</b>
+                  <span>
+                    {item.проданоВКатегории.toLocaleString()} /{" "}
+                    {item.местВКатегории.toLocaleString()} билетов
+                  </span>
+                  <span>База: {item.base.toLocaleString()} ₽</span>
+                  <span>ДЦО: {item.динамическаяЦена.toLocaleString()} ₽</span>
+                  <strong>{item.динамическаяВыручка.toLocaleString()} ₽</strong>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -580,6 +725,18 @@ const styles: any = {
     color: "#fff",
     marginBottom: 16,
   },
+  arenaInfo: {
+    marginTop: 4,
+    marginBottom: 18,
+    padding: 18,
+    borderRadius: 18,
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    color: "#dce3ef",
+  },
   sliderTop: {
     display: "flex",
     justifyContent: "space-between",
@@ -632,6 +789,24 @@ const styles: any = {
     background: "rgba(239,68,68,0.15)",
     color: "#fff",
     cursor: "pointer",
+  },
+  salesTable: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    marginTop: 14,
+  },
+  salesRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1.4fr 1fr 1fr 1.2fr",
+    gap: 10,
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 16,
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    color: "#dce3ef",
+    fontSize: 13,
   },
   chart: {
     height: 260,
